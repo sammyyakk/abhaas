@@ -10,6 +10,7 @@ const KIND_LABEL: Record<Advisory["kind"], string> = {
   shade: "SHADE",
   mist: "MIST",
   scout: "SCOUT",
+  maintenance: "MAINTENANCE",
 };
 
 export function AdvisoryCard({ advisory }: { advisory: Advisory }) {

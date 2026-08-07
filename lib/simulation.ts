@@ -437,6 +437,19 @@ export function tick(state: HouseState, policy?: SandboxPolicy, elapsedMinutes =
       allocation: { vent: 0, centre: 0, far: 0 },
     };
     zones.forEach((z) => (z.waterUsedTodayL = 0));
+
+    if (dayIndex > 0 && dayIndex % 5 === 0) {
+      newAdvisories.push(
+        makeAdvisory(
+          null,
+          "maintenance",
+          "info",
+          "Check internal gutter slope — passive recovery due for inspection",
+          "Algae growth or a blocked gutter silently kills passive condensation recovery. Five-day inspection cadence.",
+          simMinutes
+        )
+      );
+    }
   } else {
     waterLedger = { ...waterLedger, usedL: waterLedger.usedL + usedThisTick, allocation };
   }

@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutGrid, Bell, FlaskConical, Droplets, ShieldAlert, HeartPulse, Bug } from "lucide-react";
+import { LayoutGrid, Bell, FlaskConical, Droplets, ShieldAlert, HeartPulse, Bug, Wheat } from "lucide-react";
 
 export const DASHBOARD_TABS = [
   { href: "/dashboard/twin", label: "Twin View", icon: LayoutGrid },
   { href: "/dashboard/advisories", label: "Advisories", icon: Bell },
   { href: "/dashboard/sandbox", label: "Sandbox", icon: FlaskConical },
   { href: "/dashboard/ledger", label: "Water Ledger", icon: Droplets },
+  { href: "/dashboard/harvest", label: "Harvest", icon: Wheat },
   { href: "/dashboard/risk", label: "Risk Board", icon: ShieldAlert },
   { href: "/dashboard/health", label: "Health Monitor", icon: HeartPulse },
   { href: "/dashboard/pest-id", label: "Pest ID", icon: Bug },

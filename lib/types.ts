@@ -47,7 +47,7 @@ export interface FaultFlag {
   timestamp: number;
 }
 
-export type AdvisoryKind = "irrigate" | "vent" | "shade" | "mist" | "scout";
+export type AdvisoryKind = "irrigate" | "vent" | "shade" | "mist" | "scout" | "maintenance";
 export type AdvisorySeverity = "info" | "action" | "urgent";
 
 export interface Advisory {

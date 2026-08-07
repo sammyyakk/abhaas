@@ -1,17 +1,25 @@
 "use client";
 
-import { Droplets, ArrowRight, CloudRainWind } from "lucide-react";
+import { Droplets, ArrowRight, CloudRainWind, Gauge, CalendarClock, Wrench } from "lucide-react";
 import { useSimulation } from "@/lib/SimulationContext";
 import { Panel } from "../ui/Panel";
 import { StatTile } from "../ui/StatTile";
+import { Badge } from "../ui/Badge";
+import { clamp } from "@/lib/weather";
 
 const ZONE_COLORS: Record<string, string> = { vent: "#67cf00", centre: "#6add2b", far: "#59931c" };
+const GUTTER_CYCLE_DAYS = 5;
 
 export function WaterLedger() {
   const { state } = useSimulation();
   const { budgetL, usedL, recoveredL, allocation } = state.waterLedger;
   const remainingL = Math.max(0, budgetL - usedL);
   const usedPct = Math.min(100, (usedL / budgetL) * 100);
+
+  const avgDewPointNow = state.zones.reduce((s, z) => s + z.dewPoint, 0) / state.zones.length;
+  const forecastRecoveryL = clamp(2.5 + (avgDewPointNow - 10) * 0.35, 0, 7);
+  const daysSinceInspection = state.dayIndex % GUTTER_CYCLE_DAYS;
+  const daysToInspection = daysSinceInspection === 0 && state.dayIndex > 0 ? 0 : GUTTER_CYCLE_DAYS - daysSinceInspection;
 
   return (
     <div className="flex flex-col gap-4">
@@ -64,16 +72,65 @@ export function WaterLedger() {
         </div>
       </Panel>
 
-      <Panel className="p-4" accent="purple">
-        <p className="text-xs font-mono text-ink/70 leading-relaxed">
+      <Panel className="p-5" accent="purple">
+        <h3 className="text-sm font-bold uppercase tracking-wider mb-4 flex items-center gap-2 text-purple-3">
+          <Gauge size={16} /> Passive Harvesting Helper — dew point &amp; runoff predictor
+        </h3>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+          <StatTile label="Forecast Tonight" value={`+${forecastRecoveryL.toFixed(1)}`} unit="L" color="#7d559c" />
+          <StatTile label="Avg Dew Point" value={avgDewPointNow.toFixed(1)} unit="°C" />
+          <StatTile
+            label="Next Gutter Check"
+            value={daysToInspection === 0 ? "Due" : daysToInspection}
+            unit={daysToInspection === 0 ? "" : "d"}
+            color={daysToInspection === 0 ? "#ff2d2d" : undefined}
+          />
+          <StatTile label="Cycle" value={GUTTER_CYCLE_DAYS} unit="days" />
+        </div>
+
+        <div className="border-[3px] border-ink bg-paper-dim p-3 flex flex-col gap-2">
+          {state.zones.map((z) => {
+            const gap = z.airTemp - z.dewPoint;
+            const condensing = gap < 1.5;
+            return (
+              <div key={z.id} className="flex items-center justify-between text-xs font-mono">
+                <span className="font-bold uppercase">{z.label}</span>
+                <span className="text-ink/60">
+                  air {z.airTemp.toFixed(1)}°C · dew {z.dewPoint.toFixed(1)}°C · gap {gap.toFixed(1)}°C
+                </span>
+                {condensing ? (
+                  <Badge tone="info">Condensing</Badge>
+                ) : (
+                  <Badge tone="paper">Dry</Badge>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        <p className="text-xs font-mono text-ink/70 leading-relaxed mt-4">
           <span className="font-bold text-purple-3 inline-flex items-center gap-1.5">
             <CloudRainWind size={14} /> Passive condensation recovery —
           </span>{" "}
-          when a zone&apos;s
-          cover cools below dew point overnight, moisture condenses and drains through internal gutters at
-          zero energy cost. Modelled from the twin&apos;s own dew-point state and credited to tomorrow&apos;s
-          budget. Ventilation losses still dominate the moisture balance — this is a modest, honest secondary
-          credit, not the headline.
+          when a zone&apos;s cover cools below dew point overnight, moisture condenses and drains through
+          internal gutters at zero energy cost. Modelled from the twin&apos;s own dew-point state and
+          credited to tomorrow&apos;s budget. Ventilation losses still dominate the moisture balance — this
+          is a modest, honest secondary credit, not the headline.
+        </p>
+
+        <p className="text-xs font-mono text-ink/60 leading-relaxed mt-3 flex items-start gap-1.5">
+          <Wrench size={13} className="shrink-0 mt-0.5" /> Gutter maintenance reminders fire automatically
+          every {GUTTER_CYCLE_DAYS} days into the Advisory Feed — a blocked or algae-fouled gutter fails
+          silently, so the twin checks in on a schedule instead of waiting to be asked.
+        </p>
+      </Panel>
+
+      <Panel className="p-4 flex items-center gap-3" accent="ink">
+        <CalendarClock size={20} className="text-ink/50 shrink-0" />
+        <p className="text-xs font-mono text-ink/60">
+          Roadmap: real gutter geometry + roof-area-driven yield estimation. Today&apos;s model uses a
+          dew-point proxy — directionally correct, not a plumbing simulation.
         </p>
       </Panel>
     </div>
