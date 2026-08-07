@@ -34,7 +34,7 @@ export function SliderControl({
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
       />
-      <div className="flex justify-between text-[10px] font-mono text-paper/50">
+      <div className="flex justify-between text-[10px] font-mono text-ink/50">
         <span>
           {min}
           {unit}

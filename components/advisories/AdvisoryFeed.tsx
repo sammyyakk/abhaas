@@ -1,5 +1,6 @@
 "use client";
 
+import { Bell } from "lucide-react";
 import { useSimulation } from "@/lib/SimulationContext";
 import { AdvisoryCard } from "./AdvisoryCard";
 import { Panel } from "../ui/Panel";
@@ -9,8 +10,10 @@ export function AdvisoryFeed() {
   return (
     <div className="flex flex-col gap-4">
       <div>
-        <h2 className="text-2xl font-bold">Advisory Feed</h2>
-        <p className="text-sm text-paper/60 font-mono mt-1">
+        <h2 className="text-2xl font-bold flex items-center gap-2">
+          <Bell size={22} /> Advisory Feed
+        </h2>
+        <p className="text-sm text-shell-invert/60 font-mono mt-1">
           Plain language. Zone-tagged. A number and a deadline — never a raw metric.
         </p>
       </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { ShieldAlert, Eye, Bug } from "lucide-react";
 import { useSimulation } from "@/lib/SimulationContext";
 import { Panel } from "../ui/Panel";
 import { Badge } from "../ui/Badge";
@@ -37,8 +38,10 @@ export function RiskBoard() {
   return (
     <div className="flex flex-col gap-4">
       <div>
-        <h2 className="text-2xl font-bold">Risk Board</h2>
-        <p className="text-sm text-paper/60 font-mono mt-1">
+        <h2 className="text-2xl font-bold flex items-center gap-2">
+          <ShieldAlert size={22} /> Risk Board
+        </h2>
+        <p className="text-sm text-shell-invert/60 font-mono mt-1">
           Disease &amp; pest risk forecast from signals already computed — no camera, no extra sensor.
         </p>
       </div>
@@ -60,7 +63,9 @@ export function RiskBoard() {
       </div>
 
       <Panel className="p-5" accent="purple">
-        <h3 className="text-sm font-bold uppercase tracking-wider mb-2">What&apos;s being watched</h3>
+        <h3 className="text-sm font-bold uppercase tracking-wider mb-2 flex items-center gap-2">
+          <Eye size={16} /> What&apos;s being watched
+        </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-mono text-ink/70">
           <p>
             <span className="font-bold text-purple-3">Disease (leaf wetness → DSV):</span> Botrytis cinerea ·
@@ -68,7 +73,10 @@ export function RiskBoard() {
             automatic spraying.
           </p>
           <p>
-            <span className="font-bold text-purple-3">Pests (degree-day phenology):</span> whiteflies · thrips ·
+            <span className="font-bold text-purple-3 inline-flex items-center gap-1.5">
+              <Bug size={14} /> Pests (degree-day phenology):
+            </span>{" "}
+            whiteflies · thrips ·
             spider mites · aphids · leafminers · borers. Spider mites thrive in exactly the high-VPD conditions
             the controller already manages for plant stress.
           </p>

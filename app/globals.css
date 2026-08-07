@@ -1,12 +1,55 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: "Samarkan";
+  src: url("/fonts/Samarkan.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+.font-wordmark {
+  font-family: "Samarkan", var(--font-display), sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
+:root {
+  --shell: #0a0a0a;
+  --shell-invert: #f4f1e8;
+
+  --paper: #f4f1e8;
+  --paper-dim: #e6e0cc;
+
+  --shadow-ink: #000000;
+  --shadow-green: #67cf00;
+  --shadow-purple: #b273e9;
+  --shadow-danger: #ff2d2d;
+}
+
+:root[data-theme="light"] {
+  --shell: #f4f4f0;
+  --shell-invert: #0a0a0a;
+
+  --paper: #ffffff;
+  --paper-dim: #ececee;
+
+  --shadow-ink: #000000;
+  --shadow-green: #000000;
+  --shadow-purple: #000000;
+  --shadow-danger: #000000;
+}
+
 @theme inline {
   --font-display: var(--font-display);
   --font-mono: var(--font-mono);
 
   --color-ink: #0a0a0a;
-  --color-paper: #f4f1e8;
-  --color-paper-dim: #e6e0cc;
+  --color-shell: var(--shell);
+  --color-shell-invert: var(--shell-invert);
+
+  --color-paper: var(--paper);
+  --color-paper-dim: var(--paper-dim);
 
   --color-green-1: #67cf00;
   --color-green-2: #6add2b;
@@ -26,11 +69,12 @@
 
 html,
 body {
-  background: var(--color-ink);
+  background: var(--shell);
 }
 
 body {
   font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  transition: background-color 0.2s ease;
 }
 
 h1,
@@ -114,4 +158,42 @@ input[type="range"].brutal-range::-moz-range-thumb {
 }
 .animate-blink {
   animation: blink 1.4s step-start infinite;
+}
+
+@keyframes scanfill {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+.animate-scanfill {
+  animation: scanfill 1.8s steps(14) forwards;
+}
+
+/* brutalist theme toggle */
+.brutal-toggle {
+  width: 64px;
+  height: 34px;
+  background: var(--color-paper);
+  border: 3px solid var(--color-ink);
+  box-shadow: 3px 3px 0 var(--shadow-ink);
+  position: relative;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.brutal-toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 22px;
+  height: 22px;
+  background: var(--color-ink);
+  border: 2px solid var(--color-ink);
+  transition: transform 0.18s ease;
+}
+.brutal-toggle[data-on="true"] .brutal-toggle-thumb {
+  transform: translateX(28px);
+  background: var(--color-green-1);
 }

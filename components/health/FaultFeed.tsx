@@ -1,5 +1,6 @@
 "use client";
 
+import { HeartPulse, Radio, TrendingUp, Wrench, CheckCircle2, AlertTriangle } from "lucide-react";
 import { useSimulation } from "@/lib/SimulationContext";
 import type { FaultKind, ZoneId } from "@/lib/types";
 import { Panel } from "../ui/Panel";
@@ -13,14 +14,22 @@ const FAULT_LABEL: Record<FaultKind, string> = {
   actuator: "Actuator Fault",
 };
 
+const FAULT_ICON: Record<FaultKind, typeof Radio> = {
+  stuck: Radio,
+  drift: TrendingUp,
+  actuator: Wrench,
+};
+
 export function FaultFeed() {
   const { state, injectFault, clearFault } = useSimulation();
 
   return (
     <div className="flex flex-col gap-4">
       <div>
-        <h2 className="text-2xl font-bold">Health Monitor</h2>
-        <p className="text-sm text-paper/60 font-mono mt-1">
+        <h2 className="text-2xl font-bold flex items-center gap-2">
+          <HeartPulse size={22} /> Health Monitor
+        </h2>
+        <p className="text-sm text-shell-invert/60 font-mono mt-1">
           residual(t) = sensor(t) − twin(t). Divergence is diagnostic — faults render on a separate channel
           from agronomic advice, so a dead probe never produces a watering instruction.
         </p>
@@ -38,21 +47,28 @@ export function FaultFeed() {
               )}
             </div>
             <div className="flex flex-wrap gap-2">
-              {(["stuck", "drift", "actuator"] as FaultKind[]).map((kind) => (
-                <Button
-                  key={kind}
-                  tone="danger"
-                  className="text-[10px] px-2 py-1.5"
-                  disabled={!!z.faultActive}
-                  onClick={() => injectFault(z.id as ZoneId, kind)}
-                >
-                  Inject {FAULT_LABEL[kind]}
-                </Button>
-              ))}
+              {(["stuck", "drift", "actuator"] as FaultKind[]).map((kind) => {
+                const Icon = FAULT_ICON[kind];
+                return (
+                  <Button
+                    key={kind}
+                    tone="danger"
+                    className="text-[10px] px-2 py-1.5 flex items-center gap-1.5"
+                    disabled={!!z.faultActive}
+                    onClick={() => injectFault(z.id as ZoneId, kind)}
+                  >
+                    <Icon size={12} /> Inject {FAULT_LABEL[kind]}
+                  </Button>
+                );
+              })}
             </div>
             {z.faultActive && (
-              <Button tone="green" className="text-[10px] px-2 py-1.5" onClick={() => clearFault(z.id as ZoneId)}>
-                Clear fault
+              <Button
+                tone="green"
+                className="text-[10px] px-2 py-1.5 flex items-center gap-1.5 self-start"
+                onClick={() => clearFault(z.id as ZoneId)}
+              >
+                <CheckCircle2 size={12} /> Clear fault
               </Button>
             )}
           </Panel>
@@ -60,7 +76,9 @@ export function FaultFeed() {
       </div>
 
       <div>
-        <h3 className="text-sm font-bold uppercase tracking-wider text-paper/70 mb-2">Fault Channel</h3>
+        <h3 className="text-sm font-bold uppercase tracking-wider text-shell-invert/70 mb-2 flex items-center gap-2">
+          <AlertTriangle size={16} /> Fault Channel
+        </h3>
         {state.faults.length === 0 ? (
           <Panel className="p-6 text-center">
             <p className="font-mono text-sm text-ink/60">No faults detected. All residuals within ±3σ.</p>

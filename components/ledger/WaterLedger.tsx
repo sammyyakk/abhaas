@@ -1,5 +1,6 @@
 "use client";
 
+import { Droplets, ArrowRight, CloudRainWind } from "lucide-react";
 import { useSimulation } from "@/lib/SimulationContext";
 import { Panel } from "../ui/Panel";
 import { StatTile } from "../ui/StatTile";
@@ -15,8 +16,10 @@ export function WaterLedger() {
   return (
     <div className="flex flex-col gap-4">
       <div>
-        <h2 className="text-2xl font-bold">Water Ledger</h2>
-        <p className="text-sm text-paper/60 font-mono mt-1">
+        <h2 className="text-2xl font-bold flex items-center gap-2">
+          <Droplets size={22} /> Water Ledger
+        </h2>
+        <p className="text-sm text-shell-invert/60 font-mono mt-1">
           A fixed daily budget, allocated by marginal return — not watered reactively.
         </p>
       </div>
@@ -29,7 +32,9 @@ export function WaterLedger() {
       </div>
 
       <Panel className="p-5">
-        <h3 className="text-sm font-bold uppercase tracking-wider mb-3">Budget {"->"} Zone allocation</h3>
+        <h3 className="text-sm font-bold uppercase tracking-wider mb-3 flex items-center gap-2">
+          Budget <ArrowRight size={16} /> Zone allocation
+        </h3>
         <div className="border-[3px] border-ink h-10 flex overflow-hidden">
           {state.zones.map((z) => {
             const liters = allocation[z.id] ?? 0;
@@ -61,7 +66,10 @@ export function WaterLedger() {
 
       <Panel className="p-4" accent="purple">
         <p className="text-xs font-mono text-ink/70 leading-relaxed">
-          <span className="font-bold text-purple-3">Passive condensation recovery —</span> when a zone&apos;s
+          <span className="font-bold text-purple-3 inline-flex items-center gap-1.5">
+            <CloudRainWind size={14} /> Passive condensation recovery —
+          </span>{" "}
+          when a zone&apos;s
           cover cools below dew point overnight, moisture condenses and drains through internal gutters at
           zero energy cost. Modelled from the twin&apos;s own dew-point state and credited to tomorrow&apos;s
           budget. Ventilation losses still dominate the moisture balance — this is a modest, honest secondary
