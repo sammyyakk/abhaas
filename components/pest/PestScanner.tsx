@@ -64,7 +64,7 @@ export function PestScanner() {
           <Bug size={22} /> Pest ID
         </h2>
         <p className="text-sm text-shell-invert/60 font-mono mt-1">
-          Scan a leaf. A lightweight on-device model flags the pest — swappable for a real ONNX/TF.js
+          Scan a leaf. A lightweight on-device model flags the pest, swappable for a real ONNX/TF.js
           model later. Fused with the live environmental state for extra confidence.
         </p>
       </div>
@@ -118,7 +118,7 @@ export function PestScanner() {
               </p>
               <p className="text-sm text-ink/80 leading-relaxed">
                 <span className="font-bold">{hottestZone.label}</span> is currently at{" "}
-                <span className="font-mono font-bold">{hottestZone.vpdLeaf.toFixed(2)} kPa</span> leaf VPD —
+                <span className="font-mono font-bold">{hottestZone.vpdLeaf.toFixed(2)} kPa</span> leaf VPD,
                 the highest in the house, and exactly the high-VPD, low-humidity condition {result.pest.name.toLowerCase()}{" "}
                 favour. The controller is already managing this zone for plant stress; the same number is
                 now also a pest-risk signal.

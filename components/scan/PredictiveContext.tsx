@@ -3,16 +3,16 @@ import type { ZoneState } from "@/lib/types";
 import { StatTile } from "@/components/ui/StatTile";
 
 /**
- * Left column of the Dual Diagnostic Card — the predictive-environmental
+ * Left column of the Dual Diagnostic Card, the predictive-environmental
  * half. Every number here already exists in the engine (pestDD/EDD, DSV,
- * leaf wetness, VPD, csiBreakdown risk %) — this panel surfaces it
+ * leaf wetness, VPD, csiBreakdown risk %), this panel surfaces it
  * alongside the CV inference rather than computing anything new.
  */
 export function PredictiveContext({ zone }: { zone: ZoneState }) {
   return (
     <div className="flex flex-col gap-3">
       <p className="text-xs font-bold uppercase tracking-widest text-ink/60 flex items-center gap-2">
-        <Activity size={14} /> Predictive context — {zone.label}
+        <Activity size={14} /> Predictive context: {zone.label}
       </p>
       <div className="grid grid-cols-2 gap-2">
         <StatTile label="Pest EDD (ΣDD)" value={zone.pestDD.toFixed(0)} unit="DD" />

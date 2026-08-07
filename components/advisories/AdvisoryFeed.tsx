@@ -14,12 +14,12 @@ export function AdvisoryFeed() {
           <Bell size={22} /> Advisory Feed
         </h2>
         <p className="text-sm text-shell-invert/60 font-mono mt-1">
-          Plain language. Zone-tagged. A number and a deadline — never a raw metric.
+          Plain language. Zone-tagged. A number and a deadline, never a raw metric.
         </p>
       </div>
       {state.advisories.length === 0 ? (
         <Panel className="p-6 text-center">
-          <p className="font-mono text-sm text-ink/60">No active advisories — house nominal.</p>
+          <p className="font-mono text-sm text-ink/60">No active advisories, house nominal.</p>
         </Panel>
       ) : (
         <div className="flex flex-col gap-3">

@@ -30,7 +30,7 @@ export function FaultFeed() {
           <HeartPulse size={22} /> Health Monitor
         </h2>
         <p className="text-sm text-shell-invert/60 font-mono mt-1">
-          residual(t) = sensor(t) − twin(t). Divergence is diagnostic — faults render on a separate channel
+          residual(t) = sensor(t) − twin(t). Divergence is diagnostic, faults render on a separate channel
           from agronomic advice, so a dead probe never produces a watering instruction.
         </p>
       </div>

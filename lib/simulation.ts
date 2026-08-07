@@ -360,7 +360,7 @@ export function tick(state: HouseState, policy?: SandboxPolicy, elapsedMinutes =
           zone.id,
           "irrigate",
           "action",
-          `${stepped.label} — irrigate ${liters} L before ${clockLabel(dayFraction, 120)}`,
+          `${stepped.label}: irrigate ${liters} L before ${clockLabel(dayFraction, 120)}`,
           `Soil moisture depleted below the readily-available-water threshold; ${liters} L closes the deficit.`,
           simMinutes,
           { value: liters, unit: "L" }
@@ -374,7 +374,7 @@ export function tick(state: HouseState, policy?: SandboxPolicy, elapsedMinutes =
           zone.id,
           "vent",
           "info",
-          `${stepped.label} — increase ventilation, VPD low (fungal risk)`,
+          `${stepped.label}: increase ventilation, VPD low (fungal risk)`,
           `Leaf VPD ${stepped.vpdLeaf.toFixed(2)} kPa is below the ${stage.name.toLowerCase()} band; low transpiration raises fungal risk.`,
           simMinutes
         )
@@ -385,7 +385,7 @@ export function tick(state: HouseState, policy?: SandboxPolicy, elapsedMinutes =
           zone.id,
           "mist",
           "action",
-          `${stepped.label} — mist 4 min, VPD high despite soil moisture`,
+          `${stepped.label}: mist 4 min, VPD high despite soil moisture`,
           `Leaf VPD ${stepped.vpdLeaf.toFixed(2)} kPa exceeds band; stomatal closure risk even though soil water is adequate.`,
           simMinutes
         )
@@ -397,7 +397,7 @@ export function tick(state: HouseState, policy?: SandboxPolicy, elapsedMinutes =
           zone.id,
           "scout",
           "urgent",
-          `${stepped.label} — scout for disease, DSV ${stepped.dsv.toFixed(0)} crossed threshold`,
+          `${stepped.label}: scout for disease, DSV ${stepped.dsv.toFixed(0)} crossed threshold`,
           `Cumulative Disease Severity Value crossed 15; flagged for scouting, not automatic spraying.`,
           simMinutes
         )
@@ -413,15 +413,15 @@ export function tick(state: HouseState, policy?: SandboxPolicy, elapsedMinutes =
         const kind = stepped.faultActive;
         const messages: Record<FaultKind, { message: string; detail: string }> = {
           stuck: {
-            message: `${stepped.label} — sensor stuck`,
+            message: `${stepped.label}: sensor stuck`,
             detail: "Rolling variance ≈ 0 while the twin predicts change. Classified as a sensor fault, not an agronomic event.",
           },
           drift: {
-            message: `${stepped.label} — sensor drifting`,
+            message: `${stepped.label}: sensor drifting`,
             detail: "Residual (sensor − twin prediction) has exceeded ±3σ and is still growing.",
           },
           actuator: {
-            message: `${stepped.label} — irrigation actuator not responding`,
+            message: `${stepped.label}: irrigation actuator not responding`,
             detail: "Irrigation was commanded but soil moisture is not rising as the twin predicts. Possible blocked line or valve fault.",
           },
         };
@@ -454,7 +454,7 @@ export function tick(state: HouseState, policy?: SandboxPolicy, elapsedMinutes =
           null,
           "maintenance",
           "info",
-          "Check internal gutter slope — passive recovery due for inspection",
+          "Check internal gutter slope, passive recovery due for inspection",
           "Algae growth or a blocked gutter silently kills passive condensation recovery. Five-day inspection cadence.",
           simMinutes
         )

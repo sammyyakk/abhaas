@@ -2,7 +2,7 @@ import { XCircle, Link2, Sprout, Map, CloudSun } from "lucide-react";
 
 const GENERIC = [
   "Sensor reads temperature or moisture.",
-  "If it crosses a fixed threshold —",
+  "If it crosses a fixed threshold:",
   '"water now" or "open vent."',
   "Every other team builds this.",
 ];

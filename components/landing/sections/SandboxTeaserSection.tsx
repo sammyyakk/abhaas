@@ -20,7 +20,7 @@ export function SandboxTeaserSection() {
           </h2>
           <p className="mt-4 font-mono text-sm md:text-base text-shell-invert/70 max-w-2xl">
             The twin forks, fast-forwards 24 simulated hours under your proposed change, and returns a
-            delta versus doing nothing — including the trade-off a threshold system would never show you.
+            delta versus doing nothing, including the trade-off a threshold system would never show you.
           </p>
         </div>
 
@@ -30,7 +30,7 @@ export function SandboxTeaserSection() {
           style={{ boxShadow: "10px 10px 0 var(--shadow-purple)" }}
         >
           <p className="font-mono text-xs md:text-sm text-ink/60 mb-4">
-            &quot;Misting 6 min brings Zone 2 into band and saves 12 L —&quot;
+            &quot;Misting 6 min brings Zone 2 into band and saves 12 L...&quot;
           </p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {DELTAS.map((c) => (
@@ -45,7 +45,7 @@ export function SandboxTeaserSection() {
             ))}
           </div>
           <p className="font-mono text-xs md:text-sm text-ink/60 mt-4">
-            — and raises Zone 2 fungal risk. That trade-off is invisible in every threshold system.
+            ...and raises Zone 2 fungal risk. That trade-off is invisible in every threshold system.
           </p>
         </div>
       </div>

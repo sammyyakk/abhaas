@@ -58,7 +58,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
         <footer className="border-t-[3px] border-green-1 bg-shell px-4 md:px-8 py-4 flex flex-col items-center gap-2 text-center">
           <span className="inline-flex items-center gap-1.5 border-2 border-shell-invert/30 text-shell-invert/50 px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider">
-            L0 Driver: Simulated Twin — API boundary ready for ESP32/MQTT
+            L0 Driver: Simulated Twin, API boundary ready for ESP32/MQTT
           </span>
           <p className="text-[11px] font-mono text-shell-invert/40">
             ABHAAS · Team Nirvaah · PS3 Smart Polyhouse Management Interface · Avinya 2026 · Prakriti ×

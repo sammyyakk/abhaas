@@ -20,7 +20,7 @@ export function ZoneHeatmap({ state }: { state: HouseState }) {
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-lg font-bold">Polyhouse Plan View</h3>
           <span className="text-[10px] font-mono text-ink/50">
-            {isDay ? "DAY" : "NIGHT"} MODE · TARGET {band[0].toFixed(1)}–{band[1].toFixed(1)} kPa
+            {isDay ? "DAY" : "NIGHT"} MODE · TARGET {band[0].toFixed(1)}-{band[1].toFixed(1)} kPa
           </span>
         </div>
 

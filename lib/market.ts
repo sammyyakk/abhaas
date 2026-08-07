@@ -55,7 +55,7 @@ export function computeHarvestAdvisory(gddSum: number, dayIndex: number): Harves
     return {
       ...base,
       action: "harvest_now",
-      headline: `Harvest now — fruit at peak ripeness (ΣGDD ${gddSum.toFixed(0)})`,
+      headline: `Harvest now: fruit at peak ripeness (ΣGDD ${gddSum.toFixed(0)})`,
       rationale:
         "GDD accumulation has crossed the ripening threshold. Delaying further risks quality loss regardless of price.",
     };
@@ -64,7 +64,7 @@ export function computeHarvestAdvisory(gddSum: number, dayIndex: number): Harves
     return {
       ...base,
       action: "delay",
-      headline: `Delay harvest ${daysToRipen} day${daysToRipen === 1 ? "" : "s"} — mandi price projected +${pctChange.toFixed(0)}%`,
+      headline: `Delay harvest ${daysToRipen} day${daysToRipen === 1 ? "" : "s"}, mandi price projected +${pctChange.toFixed(0)}%`,
       rationale: `GDD index indicates peak ripeness in ${daysToRipen} days, and local mandi prices are trending up over that window.`,
     };
   }
@@ -72,14 +72,14 @@ export function computeHarvestAdvisory(gddSum: number, dayIndex: number): Harves
     return {
       ...base,
       action: "harvest_early",
-      headline: `Price pressure ahead — down ${Math.abs(pctChange).toFixed(0)}% by the time fruit ripens`,
+      headline: `Price pressure ahead: down ${Math.abs(pctChange).toFixed(0)}% by the time fruit ripens`,
       rationale: `Consider weighing a slightly-under-ripe early harvest against the ${daysToRipen}-day maturity gap.`,
     };
   }
   return {
     ...base,
     action: "on_track",
-    headline: `On track — harvest in ~${daysToRipen} days`,
+    headline: `On track: harvest in ~${daysToRipen} days`,
     rationale: "Price is expected to stay roughly flat over the remaining ripening window.",
   };
 }

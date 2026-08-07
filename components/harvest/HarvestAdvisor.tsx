@@ -82,7 +82,7 @@ export function HarvestAdvisor() {
           <Wheat size={22} /> Harvest Advisor
         </h2>
         <p className="text-sm text-shell-invert/60 font-mono mt-1">
-          GDD-based maturity forecast crossed with local mandi price trend — market-linked ripening, not a
+          GDD-based maturity forecast crossed with local mandi price trend, market-linked ripening, not a
           calendar date.
         </p>
       </div>
@@ -130,7 +130,7 @@ export function HarvestAdvisor() {
 
       <Panel className="p-5">
         <h3 className="text-sm font-bold uppercase tracking-wider mb-3 flex items-center gap-2">
-          <IndianRupee size={16} /> Mandi price — historical &amp; forecast
+          <IndianRupee size={16} /> Mandi price: historical &amp; forecast
         </h3>
         <PriceChart dayIndex={state.dayIndex} ripenDay={state.dayIndex + advisory.daysToRipen} />
         <div className="flex flex-wrap gap-4 mt-2 text-[11px] font-mono text-ink/60">
@@ -146,7 +146,7 @@ export function HarvestAdvisor() {
       <Panel className="p-4 flex items-center gap-3" accent="ink">
         <IndianRupee size={18} className="text-ink/50 shrink-0" />
         <p className="text-xs font-mono text-ink/60">
-          Mandi prices are a modelled placeholder — the roadmap item is wiring the real Agmarknet (Govt. of
+          Mandi prices are a modelled placeholder, the roadmap item is wiring the real Agmarknet (Govt. of
           India) feed. GDD maturity projection reuses the same crop-stage accumulator driving the VPD bands.
         </p>
       </Panel>

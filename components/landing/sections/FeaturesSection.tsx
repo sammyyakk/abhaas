@@ -1,15 +1,15 @@
 import { Map, Activity, Sprout, Radar, SlidersHorizontal, ShieldAlert, Wrench, RotateCcw, Bug, Layers } from "lucide-react";
 
 const FEATURES = [
-  { label: "Zoned", icon: Map, body: "3–4 coupled micro-zones with a heatmap, not one global reading." },
-  { label: "Physiological", icon: Activity, body: "Leaf VPD, CWSI and dew point — derived, not raw temperature." },
+  { label: "Zoned", icon: Map, body: "3-4 coupled micro-zones with a heatmap, not one global reading." },
+  { label: "Physiological", icon: Activity, body: "Leaf VPD, CWSI and dew point, derived, not raw temperature." },
   { label: "Stage-Aware", icon: Sprout, body: "GDD-driven bands shift automatically as the crop matures." },
   { label: "Predictive", icon: Radar, body: "A short-horizon VPD forecast feeds the controller before the spike." },
   { label: "Optimised", icon: SlidersHorizontal, body: "A fixed daily water budget allocated by marginal return, not rules." },
-  { label: "Risk-Forecasting", icon: ShieldAlert, body: "Disease & pest risk from signals already computed — zero new sensors." },
-  { label: "Fault-Aware", icon: Wrench, body: "The twin is a reference model — sensor faults never trigger bad advice." },
+  { label: "Risk-Forecasting", icon: ShieldAlert, body: "Disease & pest risk from signals already computed, zero new sensors." },
+  { label: "Fault-Aware", icon: Wrench, body: "The twin is a reference model, sensor faults never trigger bad advice." },
   { label: "Rehearsable", icon: RotateCcw, body: "Drag a slider, see 24h of consequence before you commit to it." },
-  { label: "Pest ID", icon: Bug, body: "Snap a leaf photo — classify whiteflies, mites, thrips, on-device." },
+  { label: "Pest ID", icon: Bug, body: "Snap a leaf photo, classify whiteflies, mites, thrips, on-device." },
 ];
 
 export function FeaturesSection() {

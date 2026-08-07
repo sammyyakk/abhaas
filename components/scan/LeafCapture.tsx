@@ -62,7 +62,7 @@ export function LeafCaptureStage({
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-paper/50 font-mono text-sm text-center px-4">
-              Camera unavailable — use &quot;upload a photo&quot; below instead.
+              Camera unavailable, use &quot;upload a photo&quot; below instead.
             </div>
           )}
           <CornerBrackets />

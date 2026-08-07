@@ -41,7 +41,7 @@ export function RiskBoard() {
           <ShieldAlert size={22} /> Risk Board
         </h2>
         <p className="text-sm text-shell-invert/60 font-mono mt-1">
-          Disease &amp; pest risk forecast from signals already computed — no camera, no extra sensor.
+          Disease &amp; pest risk forecast from signals already computed, no camera, no extra sensor.
         </p>
       </div>
 
@@ -59,7 +59,7 @@ export function RiskBoard() {
               {flagged && (
                 <div className="border-t-[3px] border-ink pt-3 -mx-4 -mb-4 px-4 pb-4 bg-danger/10">
                   <p className="text-[11px] font-mono text-ink/70 mb-2">
-                    Risk threshold reached — scan a leaf to confirm before acting.
+                    Risk threshold reached, scan a leaf to confirm before acting.
                   </p>
                   <div className="flex flex-wrap gap-2">
                     <Link
@@ -89,7 +89,7 @@ export function RiskBoard() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-mono text-ink/70">
           <p>
             <span className="font-bold text-purple-3">Disease (leaf wetness → DSV):</span> Botrytis cinerea ·
-            powdery mildew · early blight. Crossing the threshold flags a zone for scouting — never for
+            powdery mildew · early blight. Crossing the threshold flags a zone for scouting, never for
             automatic spraying.
           </p>
           <p>

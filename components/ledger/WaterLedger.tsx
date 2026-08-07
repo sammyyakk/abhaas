@@ -81,7 +81,7 @@ export function WaterLedger() {
           <Droplets size={22} /> Water Ledger
         </h2>
         <p className="text-sm text-shell-invert/60 font-mono mt-1">
-          A fixed daily budget, allocated by marginal return — not watered reactively.
+          A fixed daily budget, allocated by marginal return, not watered reactively.
         </p>
       </div>
 
@@ -119,7 +119,7 @@ export function WaterLedger() {
           {state.zones.map((z) => (
             <span key={z.id} className="flex items-center gap-2 text-xs font-mono text-ink/70">
               <span className="w-3 h-3 border-2 border-ink inline-block" style={{ background: ZONE_COLORS[z.id] }} />
-              {z.label} — {(allocation[z.id] ?? 0).toFixed(1)} L today
+              {z.label}: {(allocation[z.id] ?? 0).toFixed(1)} L today
             </span>
           ))}
         </div>
@@ -152,7 +152,7 @@ export function WaterLedger() {
               </p>
             )}
             <p className="text-[11px] font-mono text-ink/50 mt-3">
-              Modelled Mitscherlich/Doorenbos-Kassam-style yield-response curve — a defensible scaffold, not
+              Modelled Mitscherlich/Doorenbos-Kassam-style yield-response curve, a defensible scaffold, not
               a fitted agronomic model.
             </p>
           </div>
@@ -162,7 +162,7 @@ export function WaterLedger() {
 
       <Panel className="p-5" accent="purple">
         <h3 className="text-sm font-bold uppercase tracking-wider mb-4 flex items-center gap-2 text-purple-3">
-          <Gauge size={16} /> Passive Harvesting Helper — dew point &amp; runoff predictor
+          <Gauge size={16} /> Passive Harvesting Helper: dew point &amp; runoff predictor
         </h3>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
@@ -199,17 +199,17 @@ export function WaterLedger() {
 
         <p className="text-xs font-mono text-ink/70 leading-relaxed mt-4">
           <span className="font-bold text-purple-3 inline-flex items-center gap-1.5">
-            <CloudRainWind size={14} /> Passive condensation recovery —
+            <CloudRainWind size={14} /> Passive condensation recovery:
           </span>{" "}
           when a zone&apos;s cover cools below dew point overnight, moisture condenses and drains through
           internal gutters at zero energy cost. Modelled from the twin&apos;s own dew-point state and
-          credited to tomorrow&apos;s budget. Ventilation losses still dominate the moisture balance — this
+          credited to tomorrow&apos;s budget. Ventilation losses still dominate the moisture balance, this
           is a modest, honest secondary credit, not the headline.
         </p>
 
         <p className="text-xs font-mono text-ink/60 leading-relaxed mt-3 flex items-start gap-1.5">
           <Wrench size={13} className="shrink-0 mt-0.5" /> Gutter maintenance reminders fire automatically
-          every {GUTTER_CYCLE_DAYS} days into the Advisory Feed — a blocked or algae-fouled gutter fails
+          every {GUTTER_CYCLE_DAYS} days into the Advisory Feed, a blocked or algae-fouled gutter fails
           silently, so the twin checks in on a schedule instead of waiting to be asked.
         </p>
       </Panel>
@@ -218,7 +218,7 @@ export function WaterLedger() {
         <CalendarClock size={20} className="text-ink/50 shrink-0" />
         <p className="text-xs font-mono text-ink/60">
           Roadmap: real gutter geometry + roof-area-driven yield estimation. Today&apos;s model uses a
-          dew-point proxy — directionally correct, not a plumbing simulation.
+          dew-point proxy, directionally correct, not a plumbing simulation.
         </p>
       </Panel>
     </div>

@@ -64,7 +64,7 @@ export function HeroSection() {
             </p>
             <p className="mt-4 text-base md:text-lg font-mono text-shell-invert/70 max-w-2xl mx-auto md:mx-0">
               Every other team ships an alerting tool: read a sensor, cross a threshold, print a
-              warning. Abhaas is a growth-stage-aware digital twin — it turns that alert into a
+              warning. Abhaas is a growth-stage-aware digital twin, it turns that alert into a
               decision you can test first.
             </p>
             <div className="mt-8 flex flex-wrap items-center justify-center md:justify-start gap-4">

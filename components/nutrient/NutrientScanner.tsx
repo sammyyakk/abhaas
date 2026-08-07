@@ -141,7 +141,7 @@ export function NutrientScanner() {
               />
             </div>
             <p className="text-[11px] font-mono text-ink/50 mt-3">
-              Modelled estimates from confidence and deficiency type — not a validated yield model.
+              Modelled estimates from confidence and deficiency type, not a validated yield model.
             </p>
           </Panel>
 
@@ -158,13 +158,13 @@ export function NutrientScanner() {
               {waterConfusable ? (
                 <p className="text-sm text-ink/80 leading-relaxed">
                   <span className="font-bold">{limiting.zone.label}</span>&apos;s dominant crop-stress term
-                  right now is <span className="font-bold">{factorLabel(limiting.factor)}</span> — the exact
+                  right now is <span className="font-bold">{factorLabel(limiting.factor)}</span>, the exact
                   failure mode that gets mistaken for a nutrient deficiency. Rule out water stress in this
                   zone before committing to {result.deficiency.name.toLowerCase()} treatment.
                 </p>
               ) : (
                 <p className="text-sm text-ink/80 leading-relaxed">
-                  No competing water-stress signal in the house — <span className="font-bold">{limiting.zone.label}</span>
+                  No competing water-stress signal in the house, <span className="font-bold">{limiting.zone.label}</span>
                   &apos;s dominant term is {factorLabel(limiting.factor)}, unrelated to nutrition. Environmental
                   fusion supports this diagnosis rather than contradicting it.
                 </p>

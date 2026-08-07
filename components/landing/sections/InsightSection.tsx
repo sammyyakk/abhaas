@@ -16,7 +16,7 @@ export function InsightSection() {
       <div className="relative h-screen flex items-center justify-center px-5 md:px-10">
         {/* Step 1 */}
         <div data-step className="absolute inset-0 flex flex-col items-center justify-center gap-10 px-6" style={{ opacity: 0 }}>
-          <p className="font-mono text-base md:text-lg text-paper/60 uppercase tracking-widest">Step 1 — the naive system</p>
+          <p className="font-mono text-base md:text-lg text-paper/60 uppercase tracking-widest">Step 1: the naive system</p>
           <div className="flex items-center gap-6 md:gap-12 flex-wrap justify-center">
             <div className="border-[3px] border-paper bg-ink px-8 py-10 md:px-10 md:py-12 text-center w-52 md:w-60">
               <Thermometer className="mx-auto mb-2" size={32} strokeWidth={2.2} />
@@ -47,7 +47,7 @@ export function InsightSection() {
         {/* Step 2 */}
         <div data-step className="absolute inset-0 flex flex-col items-center justify-center gap-7 px-6" style={{ opacity: 0 }}>
           <p className="font-mono text-base md:text-lg text-paper/60 uppercase tracking-widest flex items-center gap-2">
-            <Sigma size={20} /> Step 2 — one derived quantity already contains both
+            <Sigma size={20} /> Step 2: one derived quantity already contains both
           </p>
           <div className="border-[3px] border-green-1 bg-ink px-8 md:px-14 py-8 md:py-10 text-center">
             <p className="text-xs font-mono text-paper/50 uppercase mb-4 tracking-widest">Vapour Pressure Deficit</p>
@@ -56,14 +56,14 @@ export function InsightSection() {
           </div>
           <p className="font-mono text-sm md:text-base text-paper/70 max-w-xl text-center">
             Stomata don&apos;t sense temperature or humidity. They sense the pull the surrounding air exerts on
-            water inside the leaf — exactly what VPD measures.
+            water inside the leaf, exactly what VPD measures.
           </p>
         </div>
 
         {/* Step 3 */}
         <div data-step className="absolute inset-0 flex flex-col items-center justify-center gap-10 px-6" style={{ opacity: 0 }}>
           <p className="font-mono text-base md:text-lg text-paper/60 uppercase tracking-widest flex items-center gap-2">
-            <GitBranch size={20} /> Step 3 — the branch becomes clean
+            <GitBranch size={20} /> Step 3: the branch becomes clean
           </p>
           <div className="flex flex-col items-center gap-4">
             <div className="border-[3px] border-purple-1 text-purple-1 px-10 py-5 font-bold text-xl md:text-2xl">VPD</div>
@@ -78,7 +78,7 @@ export function InsightSection() {
             </div>
           </div>
           <p className="font-mono text-sm md:text-base text-paper/70 max-w-xl text-center">
-            One controlled variable — two actuators can never be commanded to fight. Contradictory
+            One controlled variable, two actuators can never be commanded to fight. Contradictory
             commands become impossible by construction.
           </p>
         </div>

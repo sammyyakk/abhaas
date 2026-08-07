@@ -131,7 +131,7 @@ export function SandboxPanel() {
           </div>
           <p className="mt-3 text-xs font-mono text-shell-invert/50">
             Baseline (do nothing): CSI {result.baseline.csi.toFixed(0)} · {result.baseline.waterL.toFixed(0)} L ·
-            DSV {result.baseline.dsv.toFixed(0)} — With change: CSI {result.withChange.csi.toFixed(0)} ·{" "}
+            DSV {result.baseline.dsv.toFixed(0)}, with change: CSI {result.withChange.csi.toFixed(0)} ·{" "}
             {result.withChange.waterL.toFixed(0)} L · DSV {result.withChange.dsv.toFixed(0)}
           </p>
         </div>
