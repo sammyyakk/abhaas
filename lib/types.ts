@@ -28,7 +28,8 @@ export interface ZoneState {
   csi: number; // 0-100
   csiBreakdown: CsiBreakdown;
   dsv: number; // cumulative disease severity value
-  pestDD: number; // cumulative pest degree-days
+  pestDD: number; // cumulative pest degree-days (EDD)
+  leafWetHoursToday: number; // leaf wetness duration, resets daily
   waterUsedTodayL: number;
   ventIntegral: number; // controller integral term
   faultActive: FaultKind | null;
@@ -86,6 +87,7 @@ export interface HouseState {
   faults: FaultFlag[];
   waterLedger: WaterLedger;
   contradictoryCommands: number;
+  interventionsToday: number;
   ticks: number;
 }
 

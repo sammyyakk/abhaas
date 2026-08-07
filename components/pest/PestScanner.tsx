@@ -6,6 +6,7 @@ import { Bug, RotateCcw, Zap } from "lucide-react";
 import { useSimulation } from "@/lib/SimulationContext";
 import { classifyLeaf, type ClassificationResult } from "@/lib/pestClassifier";
 import { LeafCaptureStage, type CaptureStage } from "@/components/scan/LeafCapture";
+import { PredictiveContext } from "@/components/scan/PredictiveContext";
 import { Panel } from "@/components/ui/Panel";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
@@ -88,18 +89,26 @@ export function PestScanner() {
       {stage === "result" && result && (
         <div className="flex flex-col gap-4">
           <Panel accent="purple" className="p-6">
-            <div className="flex items-start justify-between gap-4 flex-wrap">
-              <div>
-                <Badge tone="danger">Pest Detected</Badge>
-                <p className="text-2xl md:text-3xl font-bold mt-2 uppercase">{result.pest.name}</p>
-                <p className="text-xs font-mono text-ink/60 mt-1">Confidence {result.confidence}%</p>
-              </div>
-              <div className="border-[3px] border-ink bg-paper-dim px-4 py-3 text-center">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-ink/60">Confidence</p>
-                <p className="font-mono text-3xl font-bold">{result.confidence}%</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <PredictiveContext zone={hottestZone} />
+              <div className="md:border-l-[3px] md:border-ink md:pl-6 flex flex-col gap-1">
+                <p className="text-xs font-bold uppercase tracking-widest text-ink/60 flex items-center gap-2">
+                  <Bug size={14} /> CV inference
+                </p>
+                <div className="flex items-start justify-between gap-4 flex-wrap mt-1">
+                  <div>
+                    <Badge tone="danger">Pest Detected</Badge>
+                    <p className="text-2xl md:text-3xl font-bold mt-2 uppercase">{result.pest.name}</p>
+                    <p className="text-xs font-mono text-ink/60 mt-1">Confidence {result.confidence}%</p>
+                  </div>
+                  <div className="border-[3px] border-ink bg-paper-dim px-4 py-3 text-center">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-ink/60">Confidence</p>
+                    <p className="font-mono text-3xl font-bold">{result.confidence}%</p>
+                  </div>
+                </div>
+                <p className="text-sm text-ink/70 mt-4 leading-relaxed">{result.pest.treatment}</p>
               </div>
             </div>
-            <p className="text-sm text-ink/70 mt-4 leading-relaxed">{result.pest.treatment}</p>
           </Panel>
 
           {result.pest.highVpd && hottestZone && (

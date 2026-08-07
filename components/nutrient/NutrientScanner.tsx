@@ -11,6 +11,7 @@ import {
   type NutrientResult,
 } from "@/lib/nutrientClassifier";
 import { LeafCaptureStage, type CaptureStage } from "@/components/scan/LeafCapture";
+import { PredictiveContext } from "@/components/scan/PredictiveContext";
 import { Panel } from "@/components/ui/Panel";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
@@ -97,25 +98,33 @@ export function NutrientScanner() {
       {stage === "result" && result && (
         <div className="flex flex-col gap-4">
           <Panel accent="purple" className="p-6">
-            <div className="flex items-start justify-between gap-4 flex-wrap">
-              <div>
-                <Badge tone="danger">Deficiency Detected</Badge>
-                <p className="text-2xl md:text-3xl font-bold mt-2">{result.deficiency.name}</p>
-                <p className="text-xs font-mono text-ink/60 mt-1">
-                  Symptom: {result.deficiency.symptom} · Confidence {result.confidence}%
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <PredictiveContext zone={limiting ? limiting.zone : state.zones[0]} />
+              <div className="md:border-l-[3px] md:border-ink md:pl-6 flex flex-col gap-1">
+                <p className="text-xs font-bold uppercase tracking-widest text-ink/60 flex items-center gap-2">
+                  <Leaf size={14} /> CV inference
+                </p>
+                <div className="flex items-start justify-between gap-4 flex-wrap mt-1">
+                  <div>
+                    <Badge tone="danger">Deficiency Detected</Badge>
+                    <p className="text-2xl md:text-3xl font-bold mt-2">{result.deficiency.name}</p>
+                    <p className="text-xs font-mono text-ink/60 mt-1">
+                      Symptom: {result.deficiency.symptom} · Confidence {result.confidence}%
+                    </p>
+                  </div>
+                  <div className="border-[3px] border-ink bg-paper-dim px-4 py-3 text-center">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-ink/60">Confidence</p>
+                    <p className="font-mono text-3xl font-bold">{result.confidence}%</p>
+                  </div>
+                </div>
+                <p className="text-sm text-ink/70 mt-4 leading-relaxed">
+                  <span className="font-bold">Recommended:</span> {result.deficiency.action}
+                </p>
+                <p className="text-sm text-ink/70 mt-1 leading-relaxed">
+                  <span className="font-bold">Expected impact:</span> {result.deficiency.impact}
                 </p>
               </div>
-              <div className="border-[3px] border-ink bg-paper-dim px-4 py-3 text-center">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-ink/60">Confidence</p>
-                <p className="font-mono text-3xl font-bold">{result.confidence}%</p>
-              </div>
             </div>
-            <p className="text-sm text-ink/70 mt-4 leading-relaxed">
-              <span className="font-bold">Recommended:</span> {result.deficiency.action}
-            </p>
-            <p className="text-sm text-ink/70 mt-1 leading-relaxed">
-              <span className="font-bold">Expected impact:</span> {result.deficiency.impact}
-            </p>
           </Panel>
 
           <Panel className="p-5">

@@ -1,7 +1,9 @@
 "use client";
 
-import { Droplets, ArrowRight, CloudRainWind, Gauge, CalendarClock, Wrench } from "lucide-react";
+import { Droplets, ArrowRight, CloudRainWind, Gauge, CalendarClock, Wrench, TrendingUp } from "lucide-react";
 import { useSimulation } from "@/lib/SimulationContext";
+import { yieldResponse, computeYieldEfficiency, type YieldEfficiency } from "@/lib/yield";
+import type { ZoneState } from "@/lib/types";
 import { Panel } from "../ui/Panel";
 import { StatTile } from "../ui/StatTile";
 import { Badge } from "../ui/Badge";
@@ -10,11 +12,62 @@ import { clamp } from "@/lib/weather";
 const ZONE_COLORS: Record<string, string> = { vent: "#67cf00", centre: "#6add2b", far: "#59931c" };
 const GUTTER_CYCLE_DAYS = 5;
 
+function YieldCurve({ zones }: { zones: ZoneState[] }) {
+  const width = 400;
+  const height = 150;
+  const marginL = 34;
+  const marginB = 20;
+  const xMax = Math.max(60, ...zones.map((z) => z.waterUsedTodayL * 1.4));
+  const yMax = yieldResponse(xMax) * 1.1 || 1;
+
+  const x = (w: number) => marginL + (w / xMax) * (width - marginL - 10);
+  const y = (v: number) => 10 + (1 - v / yMax) * (height - marginB - 10);
+
+  const steps = 40;
+  const points = Array.from({ length: steps + 1 }, (_, i) => {
+    const w = (i / steps) * xMax;
+    return `${x(w).toFixed(1)},${y(yieldResponse(w)).toFixed(1)}`;
+  }).join(" ");
+
+  return (
+    <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto" role="img" aria-label="Yield response curve">
+      <line x1={marginL} y1={10} x2={marginL} y2={height - marginB} stroke="currentColor" strokeOpacity={0.25} strokeWidth={1.5} />
+      <line x1={marginL} y1={height - marginB} x2={width - 10} y2={height - marginB} stroke="currentColor" strokeOpacity={0.25} strokeWidth={1.5} />
+      <text x={2} y={y(yMax) + 4} fontSize={9} fontFamily="var(--font-mono)" fill="currentColor" opacity={0.6}>
+        {yMax.toFixed(1)}kg
+      </text>
+      <text x={width - 30} y={height - marginB + 14} fontSize={9} fontFamily="var(--font-mono)" fill="currentColor" opacity={0.6}>
+        {xMax.toFixed(0)}L
+      </text>
+      <polyline points={points} fill="none" stroke="var(--color-green-1)" strokeWidth={2.5} />
+      {zones.map((z) => (
+        <circle
+          key={z.id}
+          cx={x(z.waterUsedTodayL)}
+          cy={y(yieldResponse(z.waterUsedTodayL))}
+          r={5}
+          fill={ZONE_COLORS[z.id]}
+          stroke="var(--color-ink)"
+          strokeWidth={1.5}
+        />
+      ))}
+    </svg>
+  );
+}
+
+function nextLiterCopy(eff: YieldEfficiency, zones: ZoneState[]) {
+  const zone = zones.find((z) => z.id === eff.bestMarginalZoneId);
+  if (!zone) return null;
+  return `Optimized: next liter → ${zone.label} (highest marginal return)`;
+}
+
 export function WaterLedger() {
   const { state } = useSimulation();
   const { budgetL, usedL, recoveredL, allocation } = state.waterLedger;
   const remainingL = Math.max(0, budgetL - usedL);
   const usedPct = Math.min(100, (usedL / budgetL) * 100);
+
+  const yieldEff = computeYieldEfficiency(state.zones);
 
   const avgDewPointNow = state.zones.reduce((s, z) => s + z.dewPoint, 0) / state.zones.length;
   const forecastRecoveryL = clamp(2.5 + (avgDewPointNow - 10) * 0.35, 0, 7);
@@ -69,6 +122,41 @@ export function WaterLedger() {
               {z.label} — {(allocation[z.id] ?? 0).toFixed(1)} L today
             </span>
           ))}
+        </div>
+      </Panel>
+
+      <Panel className="p-5" accent="green">
+        <h3 className="text-sm font-bold uppercase tracking-wider mb-4 flex items-center gap-2 text-green-3">
+          <TrendingUp size={16} /> Yield Efficiency Index
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              <StatTile
+                label="Water Productivity"
+                value={yieldEff.waterProductivityGPerL.toFixed(0)}
+                unit="g/L"
+                color="#59931c"
+              />
+              <StatTile
+                label="Projected Yield Gain"
+                value={`${yieldEff.projectedYieldGainPct >= 0 ? "+" : ""}${yieldEff.projectedYieldGainPct.toFixed(1)}`}
+                unit="%"
+                color="#7d559c"
+                sub="vs. equal-split baseline"
+              />
+            </div>
+            {nextLiterCopy(yieldEff, state.zones) && (
+              <p className="text-xs font-mono text-ink/70 border-[3px] border-ink bg-paper-dim p-3">
+                {nextLiterCopy(yieldEff, state.zones)}
+              </p>
+            )}
+            <p className="text-[11px] font-mono text-ink/50 mt-3">
+              Modelled Mitscherlich/Doorenbos-Kassam-style yield-response curve — a defensible scaffold, not
+              a fitted agronomic model.
+            </p>
+          </div>
+          <YieldCurve zones={state.zones} />
         </div>
       </Panel>
 

@@ -80,6 +80,7 @@ function initZone(id: ZoneId): ZoneState {
     csiBreakdown: { vpd: 0, cwsi: 0, soil: 0, disease: 0, pest: 0, dli: 0 },
     dsv: 0,
     pestDD: 0,
+    leafWetHoursToday: 0,
     waterUsedTodayL: 0,
     ventIntegral: 0,
     faultActive: null,
@@ -103,6 +104,7 @@ export function initHouseState(): HouseState {
     faults: [],
     waterLedger: { budgetL: BASE_BUDGET_L, usedL: 0, recoveredL: 0, allocation: { vent: 0, centre: 0, far: 0 } },
     contradictoryCommands: 0,
+    interventionsToday: 0,
     ticks: 0,
   };
 }
@@ -209,9 +211,13 @@ function stepZone(
   const leafWet = rh > 90 || airTemp <= dewPoint + 1.2;
   const dsvRate = leafWet ? 0.22 * (airTemp > 15 && airTemp < 30 ? 1 : 0.5) : 0;
   const dsv = zone.dsv + dsvRate * dtFrac;
+  const leafWetHoursToday = zone.leafWetHoursToday + (leafWet ? dtMinutes / 60 : 0);
 
+  // high leaf VPD accelerates pest life-cycle (spider mites in particular) —
+  // the twin's own VPD state doubling as a pest-risk multiplier, not a new sensor.
   const pestBase = 12;
-  const pestDD = zone.pestDD + Math.max(0, outdoor.tempC - pestBase) * (dtMinutes / 1440) * 1.3;
+  const vpdPestMultiplier = vpdLeaf > 1.2 ? 1.4 : 1;
+  const pestDD = zone.pestDD + Math.max(0, outdoor.tempC - pestBase) * (dtMinutes / 1440) * 1.3 * vpdPestMultiplier;
 
   // --- crop stress index (weights fixed heuristic, breakdown always shown)
   const vpdDevNorm = clamp(Math.abs(vpdLeaf - targetVpd) / 1.0, 0, 1) * 100;
@@ -267,6 +273,7 @@ function stepZone(
     },
     dsv,
     pestDD,
+    leafWetHoursToday,
     waterUsedTodayL: zone.waterUsedTodayL + litersUsed,
     ventIntegral,
     sensorOffset,
@@ -436,7 +443,10 @@ export function tick(state: HouseState, policy?: SandboxPolicy, elapsedMinutes =
       recoveredL,
       allocation: { vent: 0, centre: 0, far: 0 },
     };
-    zones.forEach((z) => (z.waterUsedTodayL = 0));
+    zones.forEach((z) => {
+      z.waterUsedTodayL = 0;
+      z.leafWetHoursToday = 0;
+    });
 
     if (dayIndex > 0 && dayIndex % 5 === 0) {
       newAdvisories.push(
@@ -456,6 +466,8 @@ export function tick(state: HouseState, policy?: SandboxPolicy, elapsedMinutes =
 
   const advisories = [...newAdvisories, ...state.advisories].slice(0, 10);
   const faults = [...newFaults, ...state.faults].slice(0, 12);
+  const interventionsToday =
+    dayIndex !== state.dayIndex ? newAdvisories.length : state.interventionsToday + newAdvisories.length;
 
   return {
     simMinutes,
@@ -469,6 +481,7 @@ export function tick(state: HouseState, policy?: SandboxPolicy, elapsedMinutes =
     faults,
     waterLedger,
     contradictoryCommands,
+    interventionsToday,
     ticks: state.ticks + 1,
   };
 }
