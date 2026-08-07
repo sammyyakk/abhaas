@@ -11,7 +11,6 @@ const INK = "#0a0a0a";
 const PAPER = "#f4f1e8";
 const GREEN = "#67cf00";
 const PURPLE = "#ce69ea";
-const PURPLE_DARK = "#7d559c";
 
 function Badge({
   children,
@@ -103,17 +102,6 @@ export async function renderOgImage() {
 
           <div style={{ display: "flex", alignItems: "center", gap: 44, marginTop: 50 }}>
             <div style={{ display: "flex", position: "relative", width: logoW, height: logoH }}>
-              <div
-                style={{
-                  display: "flex",
-                  position: "absolute",
-                  top: 10,
-                  left: 10,
-                  width: logoW,
-                  height: logoH,
-                  background: PURPLE_DARK,
-                }}
-              />
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={logoSrc}
