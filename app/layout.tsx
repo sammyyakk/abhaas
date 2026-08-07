@@ -16,11 +16,29 @@ const mono = Space_Mono({
   weight: ["400", "700"],
 });
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://abhaas.vercel.app";
+const TITLE = "ABHAAS: Smart Polyhouse Management";
+const DESCRIPTION =
+  "A growth-stage-aware digital twin for smart polyhouse management. Rehearse before you act. Team Nirvaah, Avinya 2026, PS3.";
+
 export const metadata: Metadata = {
-  title: "ABHAAS — Smart Polyhouse Management",
-  description:
-    "Abhaas — a digital twin for smart polyhouse management. Team Nirvaah, Avinya 2026, PS3.",
+  metadataBase: new URL(SITE_URL),
+  title: { default: TITLE, template: "%s · ABHAAS" },
+  description: DESCRIPTION,
   icons: { icon: "/abhaas_logo.png" },
+  openGraph: {
+    type: "website",
+    url: "/",
+    siteName: "ABHAAS",
+    title: TITLE,
+    description: DESCRIPTION,
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description: DESCRIPTION,
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
