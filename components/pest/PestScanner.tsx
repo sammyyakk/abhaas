@@ -2,26 +2,15 @@
 
 import { useCallback, useRef, useState } from "react";
 import Webcam from "react-webcam";
-import { Bug, Camera, Upload, ScanSearch, RotateCcw, Zap } from "lucide-react";
+import { Bug, RotateCcw, Zap } from "lucide-react";
 import { useSimulation } from "@/lib/SimulationContext";
 import { classifyLeaf, type ClassificationResult } from "@/lib/pestClassifier";
+import { LeafCaptureStage, type CaptureStage } from "@/components/scan/LeafCapture";
 import { Panel } from "@/components/ui/Panel";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 
-type Stage = "idle" | "preview" | "scanning" | "result";
-
-function CornerBrackets() {
-  const corner = "absolute w-8 h-8 border-purple-1";
-  return (
-    <>
-      <span className={`${corner} top-2 left-2 border-t-4 border-l-4`} />
-      <span className={`${corner} top-2 right-2 border-t-4 border-r-4`} />
-      <span className={`${corner} bottom-2 left-2 border-b-4 border-l-4`} />
-      <span className={`${corner} bottom-2 right-2 border-b-4 border-r-4`} />
-    </>
-  );
-}
+type Stage = CaptureStage | "result";
 
 export function PestScanner() {
   const { state } = useSimulation();
@@ -79,81 +68,21 @@ export function PestScanner() {
         </p>
       </div>
 
-      {stage === "idle" && (
-        <Panel className="p-5">
-          <div className="relative border-[3px] border-ink bg-ink aspect-video max-w-xl mx-auto overflow-hidden">
-            {!webcamError ? (
-              <Webcam
-                ref={webcamRef}
-                audio={false}
-                screenshotFormat="image/jpeg"
-                videoConstraints={{ facingMode: "environment" }}
-                onUserMediaError={() => setWebcamError(true)}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-paper/50 font-mono text-sm text-center px-4">
-                Camera unavailable — use &quot;upload a photo&quot; below instead.
-              </div>
-            )}
-            <CornerBrackets />
-          </div>
-          <div className="flex flex-col items-center gap-3 mt-5">
-            <Button
-              tone="purple"
-              className="text-base px-8 py-4 flex items-center gap-2"
-              onClick={capture}
-              disabled={webcamError}
-            >
-              <Camera size={18} /> Scan Leaf
-            </Button>
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="text-xs font-mono uppercase tracking-wider text-ink/50 hover:text-ink underline flex items-center gap-1.5"
-            >
-              <Upload size={12} /> or upload a photo instead
-            </button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              capture="environment"
-              className="hidden"
-              onChange={handleFile}
-            />
-          </div>
-        </Panel>
-      )}
-
-      {(stage === "preview" || stage === "scanning") && image && (
-        <Panel className="p-5">
-          <div className="relative border-[3px] border-ink bg-ink aspect-video max-w-xl mx-auto overflow-hidden">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={image} alt="Captured leaf" className="w-full h-full object-cover" />
-            <CornerBrackets />
-            {stage === "scanning" && (
-              <div className="absolute inset-x-0 bottom-0 bg-ink/80 p-3">
-                <p className="text-[10px] font-mono uppercase tracking-widest text-purple-2 mb-1.5">
-                  Analysing...
-                </p>
-                <div className="h-3 border-2 border-purple-1 bg-ink overflow-hidden">
-                  <div className="h-full bg-purple-1 animate-scanfill" />
-                </div>
-              </div>
-            )}
-          </div>
-          {stage === "preview" && (
-            <div className="flex items-center justify-center gap-3 mt-5">
-              <Button tone="purple" className="text-base px-8 py-4 flex items-center gap-2" onClick={runScan}>
-                <ScanSearch size={18} /> Analyze
-              </Button>
-              <Button tone="paper" onClick={reset} className="flex items-center gap-2">
-                <RotateCcw size={14} /> Retake
-              </Button>
-            </div>
-          )}
-        </Panel>
+      {stage !== "result" && (
+        <LeafCaptureStage
+          stage={stage}
+          image={image}
+          webcamRef={webcamRef}
+          fileInputRef={fileInputRef}
+          webcamError={webcamError}
+          onWebcamError={() => setWebcamError(true)}
+          onCapture={capture}
+          onFile={handleFile}
+          onAnalyze={runScan}
+          onRetake={reset}
+          captureLabel="Scan Leaf"
+          scanningLabel="Analysing..."
+        />
       )}
 
       {stage === "result" && result && (
