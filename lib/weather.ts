@@ -20,6 +20,18 @@ export function clamp(v: number, lo: number, hi: number) {
   return Math.min(hi, Math.max(lo, v));
 }
 
+// Wraps a base dayFraction forward/back by a number of hours, staying in [0, 1).
+// outdoorAt is a pure periodic function of dayFraction, so calling it at a
+// future offset is a legitimate forecast, not a guess: the weather model is
+// fully deterministic and already "known" ahead of time.
+export function dayFractionAt(base: number, hoursOffset: number): number {
+  return (((base * 24 + hoursOffset) / 24) % 1 + 1) % 1;
+}
+
+export function outdoorForecast(base: number, hoursOffset: number): Outdoor {
+  return outdoorAt(dayFractionAt(base, hoursOffset));
+}
+
 export function lerp(a: number, b: number, t: number) {
   return a + (b - a) * t;
 }

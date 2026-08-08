@@ -5,6 +5,7 @@ import { useSimulation } from "@/lib/SimulationContext";
 import { isZoneFlagged } from "@/lib/risk";
 import { ZoneHeatmap } from "./ZoneHeatmap";
 import { HouseStatsRow, SensorGrid } from "./SensorGrid";
+import { WeatherPanel } from "./WeatherPanel";
 import { Button } from "../ui/Button";
 import { Panel } from "../ui/Panel";
 
@@ -50,6 +51,7 @@ export function TwinView() {
         </Button>
       </div>
       <HouseStatsRow state={state} />
+      <WeatherPanel state={state} />
       <LaborStrip interventionsToday={state.interventionsToday} scoutCount={scoutCount} />
       <ZoneHeatmap state={state} />
       <SensorGrid state={state} />

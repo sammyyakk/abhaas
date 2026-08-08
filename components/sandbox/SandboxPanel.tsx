@@ -1,12 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { FlaskConical, SlidersHorizontal, Cpu } from "lucide-react";
+import { FlaskConical, SlidersHorizontal, Cpu, Wind } from "lucide-react";
 import { useSimulation } from "@/lib/SimulationContext";
 import type { SandboxPolicy, SandboxResult } from "@/lib/types";
+import { vpdForecastSeries, findBandCrossing } from "@/lib/vpdForecast";
 import { Panel } from "../ui/Panel";
 import { Button } from "../ui/Button";
+import { Badge } from "../ui/Badge";
 import { SliderControl } from "../ui/SliderControl";
+import { VpdForecastChart } from "../weather/VpdForecastChart";
 import { DeltaCard } from "./DeltaCard";
 
 const DEFAULT_POLICY: SandboxPolicy = { irrigationDeltaPct: 0, ventDelayHrs: 0, shadeShiftHrs: 0 };
@@ -21,7 +24,7 @@ const COMPUTE_STAGES = [
 const COMPUTE_MS = 1800;
 
 export function SandboxPanel() {
-  const { runSandbox } = useSimulation();
+  const { state, runSandbox } = useSimulation();
   const [policy, setPolicy] = useState<SandboxPolicy>(DEFAULT_POLICY);
   const [result, setResult] = useState<SandboxResult | null>(null);
   const [latencyMs, setLatencyMs] = useState<number | null>(null);
@@ -51,6 +54,9 @@ export function SandboxPanel() {
       setRunning(false);
     }, COMPUTE_MS);
   }
+
+  const forecastSeries = vpdForecastSeries(state.dayFraction, state.gddSum);
+  const crossing = findBandCrossing(forecastSeries);
 
   return (
     <div className="flex flex-col gap-4">
@@ -107,6 +113,29 @@ export function SandboxPanel() {
             </span>
           )}
         </div>
+      </Panel>
+
+      <Panel className="p-5" accent="purple">
+        <h3 className="text-sm font-bold uppercase tracking-wider mb-2 flex items-center gap-2 text-purple-3">
+          <Wind size={16} /> VPD Forecast, weather-aware control timing
+        </h3>
+        <p className="text-xs font-mono text-ink/60 mb-3">
+          Outdoor VPD forecast against the current target band. The purple marker shows when the controller
+          actually starts responding under the current Vent Delay setting.
+        </p>
+        <div className="flex items-center gap-2 mb-3">
+          {crossing ? (
+            <Badge tone={crossing.direction === "above" ? "danger" : "info"}>
+              Forecast crossing in ~{crossing.hoursFromNow}h ({crossing.direction})
+            </Badge>
+          ) : (
+            <Badge tone="nominal">No band crossing forecast (18h)</Badge>
+          )}
+          {crossing && policy.ventDelayHrs > 0 && (
+            <Badge tone="paper">Response delayed +{policy.ventDelayHrs}h from crossing</Badge>
+          )}
+        </div>
+        <VpdForecastChart series={forecastSeries} crossing={crossing} responseDelayHrs={policy.ventDelayHrs} />
       </Panel>
 
       {running && (
