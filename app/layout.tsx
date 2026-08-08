@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, Space_Mono } from "next/font/google";
 import { ThemeProvider } from "next-themes";
+import { IntroLoader } from "@/components/intro/IntroLoader";
 import "katex/dist/katex.min.css";
 import "./globals.css";
 
@@ -46,6 +47,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="en" className={`${display.variable} ${mono.variable} h-full antialiased`} suppressHydrationWarning>
       <body className="min-h-full flex flex-col bg-shell text-shell-invert">
         <ThemeProvider attribute="data-theme" defaultTheme="dark" enableSystem={false}>
+          <IntroLoader />
           {children}
         </ThemeProvider>
       </body>
