@@ -16,8 +16,8 @@ export function ZoneHeatmap({ state }: { state: HouseState }) {
 
   return (
     <Panel>
-      <div className="p-4 md:p-5">
-        <div className="flex items-center justify-between mb-3">
+      <div className="p-3 md:p-4">
+        <div className="flex items-center justify-between mb-2">
           <h3 className="text-lg font-bold">Polyhouse Plan View</h3>
           <span className="text-[10px] font-mono text-ink/50">
             {isDay ? "DAY" : "NIGHT"} MODE · TARGET {band[0].toFixed(1)}-{band[1].toFixed(1)} kPa
@@ -25,7 +25,7 @@ export function ZoneHeatmap({ state }: { state: HouseState }) {
         </div>
 
         <div className="border-[3px] border-ink relative">
-          <div className="flex items-center justify-around bg-ink text-green-1 text-[10px] font-mono py-1 tracking-widest">
+          <div className="flex items-center justify-around bg-ink text-green-1 text-[10px] font-mono py-0.5 tracking-widest">
             <span>↑ VENT ↑</span>
             <span>↑ VENT ↑</span>
           </div>
@@ -35,7 +35,7 @@ export function ZoneHeatmap({ state }: { state: HouseState }) {
               return (
                 <div
                   key={z.id}
-                  className="flex-1 border-ink md:border-r-[3px] last:border-r-0 border-b-[3px] md:border-b-0 last:border-b-0 p-4 flex flex-col gap-2 min-w-0"
+                  className="flex-1 border-ink md:border-r-[3px] last:border-r-0 border-b-[3px] md:border-b-0 last:border-b-0 p-3 flex flex-col gap-1.5 min-w-0"
                   style={{ background: `${s.tint}22` }}
                 >
                   <div className="flex items-center justify-between">
@@ -43,8 +43,8 @@ export function ZoneHeatmap({ state }: { state: HouseState }) {
                     <Badge tone={s.tone}>{s.label}</Badge>
                   </div>
                   <span className="text-[10px] font-mono text-ink/50 uppercase">{z.sublabel}</span>
-                  <div className="flex items-baseline gap-1 mt-1">
-                    <span className="font-mono text-3xl font-bold">{z.vpdLeaf.toFixed(2)}</span>
+                  <div className="flex items-baseline gap-1">
+                    <span className="font-mono text-2xl font-bold">{z.vpdLeaf.toFixed(2)}</span>
                     <span className="text-xs font-mono text-ink/60">kPa leaf VPD</span>
                   </div>
                   <div className="flex gap-3 text-[11px] font-mono text-ink/70">
@@ -58,7 +58,7 @@ export function ZoneHeatmap({ state }: { state: HouseState }) {
           </div>
         </div>
 
-        <div className="mt-3 flex flex-wrap items-center gap-3 text-[10px] font-mono text-ink/50">
+        <div className="mt-2 flex flex-wrap items-center gap-3 text-[10px] font-mono text-ink/50">
           <span className="flex items-center gap-1">
             <span className="w-3 h-3 border-2 border-ink inline-block" style={{ background: "#67cf0022" }} /> in band
           </span>

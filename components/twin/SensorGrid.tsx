@@ -29,10 +29,10 @@ export function HouseStatsRow({ state }: { state: HouseState }) {
 
 export function SensorGrid({ state }: { state: HouseState }) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
       {state.zones.map((z) => (
-        <Panel key={z.id} accent={z.faultActive ? "danger" : "ink"} className="p-4">
-          <div className="flex items-center justify-between mb-3">
+        <Panel key={z.id} accent={z.faultActive ? "danger" : "ink"} className="p-3">
+          <div className="flex items-center justify-between mb-2">
             <div>
               <h4 className="font-bold text-sm">
                 {z.label} <span className="text-ink/50 font-normal">· {z.sublabel}</span>
@@ -44,7 +44,7 @@ export function SensorGrid({ state }: { state: HouseState }) {
               <Badge tone="nominal">NOMINAL</Badge>
             )}
           </div>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-1.5">
             <StatTile label="Air Temp" value={z.airTemp.toFixed(1)} unit="°C" />
             <StatTile label="RH" value={z.rh.toFixed(0)} unit="%" />
             <StatTile label="Soil θ" value={z.soilMoisture.toFixed(2)} unit="m³/m³" />
@@ -54,7 +54,7 @@ export function SensorGrid({ state }: { state: HouseState }) {
             <StatTile label="Vent" value={z.ventPct.toFixed(0)} unit="%" />
             <StatTile label="Shade" value={z.shadePct.toFixed(0)} unit="%" />
           </div>
-          <div className="mt-2 flex gap-2 text-[11px] font-mono text-ink/60">
+          <div className="mt-1.5 flex gap-2 text-[11px] font-mono text-ink/60">
             <span>Water today: {z.waterUsedTodayL.toFixed(1)} L</span>
             {z.misting && <span className="text-purple-3 font-bold">· MISTING</span>}
           </div>

@@ -14,7 +14,7 @@ const MINUTES_SAVED_PER_INTERVENTION = 15;
 function LaborStrip({ interventionsToday, scoutCount }: { interventionsToday: number; scoutCount: number }) {
   const hoursSaved = (interventionsToday * MINUTES_SAVED_PER_INTERVENTION) / 60;
   return (
-    <Panel className="p-4" accent="green">
+    <Panel className="p-3" accent="green">
       <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs font-mono">
         <span className="flex items-center gap-2 font-bold uppercase tracking-wider text-green-3">
           <Zap size={14} /> Automation
@@ -41,7 +41,7 @@ export function TwinView() {
   const scoutCount = state.zones.filter(isZoneFlagged).length;
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold flex items-center gap-2">
           <LayoutGrid size={22} /> Twin View
@@ -51,9 +51,9 @@ export function TwinView() {
         </Button>
       </div>
       <HouseStatsRow state={state} />
-      <WeatherPanel state={state} />
       <LaborStrip interventionsToday={state.interventionsToday} scoutCount={scoutCount} />
       <ZoneHeatmap state={state} />
+      <WeatherPanel state={state} />
       <SensorGrid state={state} />
     </div>
   );

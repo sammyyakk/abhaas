@@ -4,10 +4,12 @@ export function VpdForecastChart({
   series,
   crossing,
   responseDelayHrs,
+  height = 180,
 }: {
   series: VpdForecastPoint[];
   crossing: { hoursFromNow: number; direction: "above" | "below" } | null;
   responseDelayHrs?: number;
+  height?: number;
 }) {
   const values = series.flatMap((p) => [p.vpdOutdoor, p.bandLo, p.bandHi]);
   const min = Math.min(...values);
@@ -17,7 +19,6 @@ export function VpdForecastChart({
   const yMax = max + pad;
 
   const width = 640;
-  const height = 180;
   const marginL = 34;
   const marginB = 20;
   const hStart = series[0].hoursFromNow;
