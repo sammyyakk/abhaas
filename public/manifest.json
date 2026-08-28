@@ -1,0 +1,16 @@
+{
+  "name": "Abhaas: Smart Polyhouse Management",
+  "short_name": "Abhaas",
+  "description": "A growth-stage-aware digital twin for smart polyhouse management. Rehearse before you act.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

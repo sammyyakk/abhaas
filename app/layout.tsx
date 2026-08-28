@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Space_Grotesk, Space_Mono } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { IntroLoader } from "@/components/intro/IntroLoader";
@@ -26,7 +26,11 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: { default: TITLE, template: "%s · ABHAAS" },
   description: DESCRIPTION,
-  icons: { icon: "/abhaas_logo.png" },
+  manifest: "/manifest.json",
+  icons: {
+    icon: "/abhaas_logo.png",
+    apple: "/icons/apple-touch-icon.png",
+  },
   openGraph: {
     type: "website",
     url: "/",
@@ -40,6 +44,10 @@ export const metadata: Metadata = {
     title: TITLE,
     description: DESCRIPTION,
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0a0a0a",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
