@@ -315,11 +315,18 @@ function recentlyAdvised(advisories: Advisory[], zoneId: ZoneId, kind: AdvisoryK
 
 // --- Top-level tick -----------------------------------------------------------
 
-export function tick(state: HouseState, policy?: SandboxPolicy, elapsedMinutes = 0): HouseState {
+export function tick(
+  state: HouseState,
+  policy?: SandboxPolicy,
+  elapsedMinutes = 0,
+  liveOutdoor?: Outdoor
+): HouseState {
   const simMinutes = state.simMinutes + DT_MINUTES;
   const dayFraction = (simMinutes % 1440) / 1440;
   const dayIndex = Math.floor(simMinutes / 1440);
-  const outdoor = outdoorAt(dayFraction);
+  // liveOutdoor (real fetched weather) takes priority when available; the
+  // synthetic model is the fallback, not the other way round.
+  const outdoor = liveOutdoor ?? outdoorAt(dayFraction);
 
   const ventSuppressed = !!policy && elapsedMinutes < policy.ventDelayHrs * 60;
   const shadeShiftHrs = policy?.shadeShiftHrs ?? 0;

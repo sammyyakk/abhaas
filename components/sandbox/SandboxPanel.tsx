@@ -24,7 +24,7 @@ const COMPUTE_STAGES = [
 const COMPUTE_MS = 1800;
 
 export function SandboxPanel() {
-  const { state, runSandbox } = useSimulation();
+  const { state, runSandbox, getOutdoorForecast, liveWeatherActive } = useSimulation();
   const [policy, setPolicy] = useState<SandboxPolicy>(DEFAULT_POLICY);
   const [result, setResult] = useState<SandboxResult | null>(null);
   const [latencyMs, setLatencyMs] = useState<number | null>(null);
@@ -55,7 +55,7 @@ export function SandboxPanel() {
     }, COMPUTE_MS);
   }
 
-  const forecastSeries = vpdForecastSeries(state.dayFraction, state.gddSum);
+  const forecastSeries = vpdForecastSeries(getOutdoorForecast, state.gddSum);
   const crossing = findBandCrossing(forecastSeries);
 
   return (
@@ -116,9 +116,14 @@ export function SandboxPanel() {
       </Panel>
 
       <Panel className="p-5" accent="purple">
-        <h3 className="text-sm font-bold uppercase tracking-wider mb-2 flex items-center gap-2 text-purple-3">
-          <Wind size={16} /> VPD Forecast, weather-aware control timing
-        </h3>
+        <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
+          <h3 className="text-sm font-bold uppercase tracking-wider flex items-center gap-2 text-purple-3">
+            <Wind size={16} /> VPD Forecast, weather-aware control timing
+          </h3>
+          <Badge tone={liveWeatherActive ? "nominal" : "paper"}>
+            {liveWeatherActive ? "Live forecast" : "Modelled (offline/out of range)"}
+          </Badge>
+        </div>
         <p className="text-xs font-mono text-ink/60 mb-3">
           Outdoor VPD forecast against the current target band. The purple marker shows when the controller
           actually starts responding under the current Vent Delay setting.

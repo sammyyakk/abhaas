@@ -1,4 +1,4 @@
-import { outdoorForecast } from "./weather";
+import type { Outdoor } from "./types";
 import { vpd, stageForGdd } from "./simulation";
 
 // Ambient/outdoor VPD forecast — the condition the zone controller has to
@@ -16,7 +16,7 @@ export interface VpdForecastPoint {
 }
 
 export function vpdForecastSeries(
-  dayFraction: number,
+  getOutdoor: (hoursOffset: number) => Outdoor,
   gddSum: number,
   back = 6,
   forward = 18
@@ -24,7 +24,7 @@ export function vpdForecastSeries(
   const stage = stageForGdd(gddSum);
   const points: VpdForecastPoint[] = [];
   for (let h = -back; h <= forward; h++) {
-    const { tempC, rh, solarWm2 } = outdoorForecast(dayFraction, h);
+    const { tempC, rh, solarWm2 } = getOutdoor(h);
     const isDay = solarWm2 > 5;
     const [bandLo, bandHi] = isDay ? stage.day : stage.night;
     const vpdOutdoor = vpd(tempC, rh);

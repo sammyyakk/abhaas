@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
-import { Thermometer, Droplets, Wind, CloudDrizzle, CloudSun } from "lucide-react";
+import { Thermometer, Droplets, Wind, CloudDrizzle, CloudSun, Satellite } from "lucide-react";
 import type { HouseState } from "@/lib/types";
 import { vpd, dewPointC } from "@/lib/simulation";
-import { outdoorForecast } from "@/lib/weather";
+import { useSimulation } from "@/lib/SimulationContext";
 import { vpdForecastSeries, findBandCrossing } from "@/lib/vpdForecast";
 import { Panel } from "../ui/Panel";
 import { Badge } from "../ui/Badge";
@@ -45,11 +45,12 @@ function ConditionTile({
 }
 
 export function WeatherPanel({ state }: { state: HouseState }) {
+  const { getOutdoorForecast, liveWeatherActive } = useSimulation();
   const { tempC, rh, solarWm2 } = state.outdoor;
   const outdoorVpd = vpd(tempC, rh);
   const outdoorDewPoint = dewPointC(tempC, rh);
 
-  const series = vpdForecastSeries(state.dayFraction, state.gddSum);
+  const series = vpdForecastSeries(getOutdoorForecast, state.gddSum);
   const crossing = findBandCrossing(series);
 
   return (
@@ -58,13 +59,18 @@ export function WeatherPanel({ state }: { state: HouseState }) {
         <h3 className="text-sm font-bold uppercase tracking-wider flex items-center gap-2 text-purple-3">
           <CloudSun size={16} /> Weather
         </h3>
-        {crossing ? (
-          <Badge tone={crossing.direction === "above" ? "danger" : "info"}>
-            Band crossing in ~{crossing.hoursFromNow}h ({crossing.direction})
+        <div className="flex items-center gap-2 flex-wrap justify-end">
+          <Badge tone={liveWeatherActive ? "nominal" : "paper"}>
+            <Satellite size={11} /> {liveWeatherActive ? "Live forecast" : "Modelled (offline/out of range)"}
           </Badge>
-        ) : (
-          <Badge tone="nominal">No band crossing forecast (18h)</Badge>
-        )}
+          {crossing ? (
+            <Badge tone={crossing.direction === "above" ? "danger" : "info"}>
+              Band crossing in ~{crossing.hoursFromNow}h ({crossing.direction})
+            </Badge>
+          ) : (
+            <Badge tone="nominal">No band crossing forecast (18h)</Badge>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-2 mb-2.5">
@@ -77,7 +83,7 @@ export function WeatherPanel({ state }: { state: HouseState }) {
 
       <div className="flex gap-1.5 overflow-x-auto pb-1 mb-2.5">
         {OUTLOOK_STEPS_HRS.map((h) => {
-          const o = outdoorForecast(state.dayFraction, h);
+          const o = getOutdoorForecast(h);
           const v = vpd(o.tempC, o.rh);
           return (
             <div key={h} className="border-2 border-ink bg-paper p-1.5 flex flex-col items-center gap-0.5 min-w-[52px] shrink-0">
@@ -93,7 +99,10 @@ export function WeatherPanel({ state }: { state: HouseState }) {
       <VpdForecastChart series={series} crossing={crossing} height={130} />
       <p className="text-[10px] font-mono text-ink/50 mt-1.5">
         Outdoor/ambient VPD forecast, the condition the zone controller works against, not a leaf-VPD
-        prediction. Derived from the twin&apos;s own deterministic weather model, not a live feed.
+        prediction.{" "}
+        {liveWeatherActive
+          ? "Real hourly forecast (Open-Meteo, IIT Guwahati) where in range, blending into the twin's own model beyond it."
+          : "Live forecast unavailable right now (offline or simulated time has run past the fetched window), showing the twin's own deterministic model instead."}
       </p>
     </Panel>
   );
