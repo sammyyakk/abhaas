@@ -26,6 +26,61 @@ export function priceSeries(centerDay: number, back = 10, forward = 8): MarketPo
   return points;
 }
 
+// Real historical mandi prices (data.gov.in / Agmarknet), gated behind an
+// API key I can't register on your behalf — this activates the moment
+// NEXT_PUBLIC_AGMARKNET_API_KEY is set in .env.local, no code change needed.
+// Agmarknet only publishes past arrivals, not a forecast, so this only ever
+// supplies the *historical* segment of the price chart; the forward-looking
+// projection stays the synthetic model regardless (there's no real source
+// for that part), same honesty pattern as everywhere else in the app.
+const AGMARKNET_RESOURCE_ID = "9ef84268-d588-465a-a308-a864a43d0070";
+
+export interface RealMandiSeries {
+  points: MarketPoint[]; // day: 0 = most recent real record, negative = past
+  commodity: string;
+  state: string;
+}
+
+export async function fetchRealMandiPrices(
+  apiKey: string,
+  commodity = "Tomato",
+  state = "Assam"
+): Promise<RealMandiSeries | null> {
+  try {
+    const params = new URLSearchParams({
+      "api-key": apiKey,
+      format: "json",
+      limit: "100",
+      "filters[commodity]": commodity,
+      "filters[state]": state,
+      sort: "arrival_date",
+    });
+    const res = await fetch(`https://api.data.gov.in/resource/${AGMARKNET_RESOURCE_ID}?${params.toString()}`);
+    if (!res.ok) return null;
+
+    const json = await res.json();
+    const records: Array<{ arrival_date: string; modal_price: string }> = json.records ?? [];
+    if (!records.length) return null;
+
+    const DAY_MS = 86_400_000;
+    const parsed = records
+      .map((r) => {
+        const [dd, mm, yyyy] = r.arrival_date.split("/").map(Number);
+        // modal_price is ₹ per quintal (100 kg); the rest of the app works in ₹/kg
+        return { date: new Date(yyyy, mm - 1, dd).getTime(), price: Number(r.modal_price) / 100 };
+      })
+      .filter((r) => Number.isFinite(r.date) && Number.isFinite(r.price) && r.price > 0)
+      .sort((a, b) => a.date - b.date);
+    if (!parsed.length) return null;
+
+    const latestDate = parsed[parsed.length - 1].date;
+    const points = parsed.map((r) => ({ day: Math.round((r.date - latestDate) / DAY_MS), price: r.price }));
+    return { points, commodity, state };
+  } catch {
+    return null;
+  }
+}
+
 export type HarvestAction = "delay" | "harvest_now" | "harvest_early" | "on_track";
 
 export interface HarvestAdvisory {

@@ -1,11 +1,14 @@
 "use client";
 
-import { Wheat, IndianRupee, CalendarClock, CheckCircle2, AlertTriangle, Minus, TrendingUp, TrendingDown } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Wheat, IndianRupee, CalendarClock, CheckCircle2, AlertTriangle, Minus, TrendingUp, TrendingDown, Satellite } from "lucide-react";
 import { useSimulation } from "@/lib/SimulationContext";
-import { computeHarvestAdvisory, priceSeries, type HarvestAction } from "@/lib/market";
+import { computeHarvestAdvisory, priceSeries, fetchRealMandiPrices, type HarvestAction, type RealMandiSeries } from "@/lib/market";
 import { Panel } from "../ui/Panel";
 import { StatTile } from "../ui/StatTile";
 import { Badge } from "../ui/Badge";
+
+const AGMARKNET_API_KEY = process.env.NEXT_PUBLIC_AGMARKNET_API_KEY;
 
 const ACTION_META: Record<HarvestAction, { accent: "green" | "purple" | "danger" | "ink"; icon: typeof CheckCircle2; label: string }> = {
   harvest_now: { accent: "green", icon: CheckCircle2, label: "Harvest Now" },
@@ -14,9 +17,22 @@ const ACTION_META: Record<HarvestAction, { accent: "green" | "purple" | "danger"
   on_track: { accent: "ink", icon: Minus, label: "On Track" },
 };
 
-function PriceChart({ dayIndex, ripenDay }: { dayIndex: number; ripenDay: number }) {
+function PriceChart({
+  dayIndex,
+  ripenDay,
+  realHistorical,
+}: {
+  dayIndex: number;
+  ripenDay: number;
+  realHistorical?: { day: number; price: number }[];
+}) {
   const series = priceSeries(dayIndex);
-  const prices = series.map((p) => p.price);
+  const forecast = series.filter((p) => p.day >= dayIndex);
+  // Real data replaces the historical segment entirely when available —
+  // Agmarknet only publishes past arrivals, so it only ever covers "day <= dayIndex".
+  const historical = realHistorical && realHistorical.length ? realHistorical : series.filter((p) => p.day <= dayIndex);
+
+  const prices = [...historical, ...forecast].map((p) => p.price);
   const min = Math.min(...prices);
   const max = Math.max(...prices);
   const pad = (max - min) * 0.15 || 1;
@@ -27,15 +43,14 @@ function PriceChart({ dayIndex, ripenDay }: { dayIndex: number; ripenDay: number
   const height = 180;
   const marginL = 34;
   const marginB = 20;
-  const dayStart = series[0].day;
+  const dayStart = Math.min(historical[0]?.day ?? dayIndex, series[0].day);
   const dayEnd = series[series.length - 1].day;
 
   const x = (day: number) => marginL + ((day - dayStart) / (dayEnd - dayStart)) * (width - marginL - 10);
   const y = (price: number) => 10 + (1 - (price - yMin) / (yMax - yMin)) * (height - marginB - 10);
 
-  const historical = series.filter((p) => p.day <= dayIndex);
-  const forecast = series.filter((p) => p.day >= dayIndex);
-  const toPoints = (pts: typeof series) => pts.map((p) => `${x(p.day).toFixed(1)},${y(p.price).toFixed(1)}`).join(" ");
+  const toPoints = (pts: { day: number; price: number }[]) =>
+    pts.map((p) => `${x(p.day).toFixed(1)},${y(p.price).toFixed(1)}`).join(" ");
   const ripenInRange = ripenDay >= dayStart && ripenDay <= dayEnd;
 
   return (
@@ -74,6 +89,22 @@ export function HarvestAdvisor() {
   const advisory = computeHarvestAdvisory(state.gddSum, state.dayIndex);
   const meta = ACTION_META[advisory.action];
   const TrendIcon = advisory.pctChange > 0.5 ? TrendingUp : advisory.pctChange < -0.5 ? TrendingDown : Minus;
+
+  const [realMandi, setRealMandi] = useState<RealMandiSeries | null>(null);
+  useEffect(() => {
+    if (!AGMARKNET_API_KEY) return;
+    let cancelled = false;
+    fetchRealMandiPrices(AGMARKNET_API_KEY).then((series) => {
+      if (!cancelled) setRealMandi(series);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Anchor real "day 0" (most recent record) onto the sim's current dayIndex
+  // so both series share the same x-axis.
+  const realHistorical = realMandi?.points.map((p) => ({ day: state.dayIndex + p.day, price: p.price }));
 
   return (
     <div className="flex flex-col gap-4">
@@ -129,16 +160,23 @@ export function HarvestAdvisor() {
       </Panel>
 
       <Panel className="p-5">
-        <h3 className="text-sm font-bold uppercase tracking-wider mb-3 flex items-center gap-2">
-          <IndianRupee size={16} /> Mandi price: historical &amp; forecast
-        </h3>
-        <PriceChart dayIndex={state.dayIndex} ripenDay={state.dayIndex + advisory.daysToRipen} />
+        <div className="flex items-center justify-between flex-wrap gap-2 mb-3">
+          <h3 className="text-sm font-bold uppercase tracking-wider flex items-center gap-2">
+            <IndianRupee size={16} /> Mandi price: historical &amp; forecast
+          </h3>
+          {AGMARKNET_API_KEY && (
+            <Badge tone={realHistorical?.length ? "nominal" : "paper"}>
+              <Satellite size={11} /> {realHistorical?.length ? "Real Agmarknet data" : "Agmarknet fetch pending/failed"}
+            </Badge>
+          )}
+        </div>
+        <PriceChart dayIndex={state.dayIndex} ripenDay={state.dayIndex + advisory.daysToRipen} realHistorical={realHistorical} />
         <div className="flex flex-wrap gap-4 mt-2 text-[11px] font-mono text-ink/60">
           <span className="flex items-center gap-1.5">
-            <span className="w-4 h-0.5 bg-green-1 inline-block" /> historical
+            <span className="w-4 h-0.5 bg-green-1 inline-block" /> historical{realHistorical?.length ? " (real)" : ""}
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="w-4 h-0.5 bg-purple-1 inline-block opacity-70" /> forecast (dashed on chart)
+            <span className="w-4 h-0.5 bg-purple-1 inline-block opacity-70" /> forecast (dashed on chart), modelled
           </span>
         </div>
       </Panel>
@@ -146,8 +184,10 @@ export function HarvestAdvisor() {
       <Panel className="p-4 flex items-center gap-3" accent="ink">
         <IndianRupee size={18} className="text-ink/50 shrink-0" />
         <p className="text-xs font-mono text-ink/60">
-          Mandi prices are a modelled placeholder, the roadmap item is wiring the real Agmarknet (Govt. of
-          India) feed. GDD maturity projection reuses the same crop-stage accumulator driving the VPD bands.
+          {realHistorical?.length
+            ? "Historical prices are real Agmarknet (Govt. of India) data. Agmarknet publishes past arrivals only, so the forward projection past today stays a modelled trend, not a real forecast."
+            : "Mandi prices are a modelled placeholder. Wiring is in place for the real Agmarknet (Govt. of India) feed, it activates once NEXT_PUBLIC_AGMARKNET_API_KEY is set."}{" "}
+          GDD maturity projection reuses the same crop-stage accumulator driving the VPD bands.
         </p>
       </Panel>
     </div>
