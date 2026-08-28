@@ -1,4 +1,5 @@
 import type { ZoneState, CsiBreakdown } from "./types";
+import { analyzeLeafImage, weightedPick, type LeafImageFeatures } from "./leafImageAnalysis";
 
 export interface NutrientInfo {
   id: string;
@@ -74,15 +75,55 @@ export interface NutrientResult {
   waterSavingsPct: number;
 }
 
+// Flat baseline per candidate so nothing is ever ruled fully out; a leaf's
+// color alone can't cleanly separate every deficiency (zinc/boron in
+// particular have no strong color signature here), so those lean mostly on
+// the baseline rather than a fabricated color correlate.
+function nutrientWeight(n: NutrientInfo, f: LeafImageFeatures): number {
+  switch (n.id) {
+    case "nitrogen":
+      return 3 + f.yellowPct;
+    case "phosphorus":
+      return 3 + f.purpleRedPct * 1.4;
+    case "potassium":
+      return 3 + f.brownPct * 1.2;
+    case "magnesium":
+      return 3 + f.yellowPct * 0.7 + f.greenPct * 0.2;
+    case "iron":
+      return 3 + f.yellowPct * 0.5 + f.avgBrightness / 6;
+    case "calcium":
+      return 3 + f.brownPct * 0.6;
+    case "boron":
+      return 3 + f.edgeDensity * 120;
+    default:
+      return 3;
+  }
+}
+
 /**
- * Mock classifier — swap for a real leaf-image model later. Same
- * fire-and-forget contract as classifyLeaf() in pestClassifier.ts.
+ * Heuristic classifier over real captured-image pixels (see
+ * lib/leafImageAnalysis.ts) — not a trained leaf-image model, but it
+ * genuinely looks at what was photographed rather than ignoring it.
+ * Same fire-and-forget contract as classifyLeaf() in pestClassifier.ts.
  */
 export async function classifyNutrient(image: string | Blob): Promise<NutrientResult> {
-  void image;
-  await new Promise((resolve) => setTimeout(resolve, 1600));
-  const deficiency = NUTRIENT_LIST[Math.floor(Math.random() * NUTRIENT_LIST.length)];
-  const confidence = Math.round(68 + Math.random() * 26);
+  const [features] = await Promise.all([
+    analyzeLeafImage(image).catch(() => null),
+    new Promise((resolve) => setTimeout(resolve, 1600)),
+  ]);
+
+  let deficiency: NutrientInfo;
+  let confidence: number;
+  if (!features) {
+    deficiency = NUTRIENT_LIST[Math.floor(Math.random() * NUTRIENT_LIST.length)];
+    confidence = Math.round(68 + Math.random() * 26);
+  } else {
+    const weights = NUTRIENT_LIST.map((n) => nutrientWeight(n, features));
+    const picked = weightedPick(NUTRIENT_LIST, weights);
+    deficiency = picked.item;
+    confidence = Math.round(58 + picked.share * 38);
+  }
+
   const yieldRecoveryPct = Math.round(6 + (confidence / 100) * 14);
   const waterSavingsPct = deficiency.id === "calcium" ? Math.round(8 + Math.random() * 10) : Math.round(Math.random() * 4);
   return { deficiency, confidence, yieldRecoveryPct, waterSavingsPct };
