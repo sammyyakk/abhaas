@@ -4,6 +4,7 @@ import type { HouseState } from "@/lib/types";
 import { vpd, dewPointC } from "@/lib/simulation";
 import { useSimulation } from "@/lib/SimulationContext";
 import { vpdForecastSeries, findBandCrossing } from "@/lib/vpdForecast";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { Panel } from "../ui/Panel";
 import { Badge } from "../ui/Badge";
 import { WeatherIcon } from "../weather/WeatherIcon";
@@ -46,6 +47,7 @@ function ConditionTile({
 
 export function WeatherPanel({ state }: { state: HouseState }) {
   const { getOutdoorForecast, liveWeatherActive } = useSimulation();
+  const { t } = useLanguage();
   const { tempC, rh, solarWm2 } = state.outdoor;
   const outdoorVpd = vpd(tempC, rh);
   const outdoorDewPoint = dewPointC(tempC, rh);
@@ -57,28 +59,28 @@ export function WeatherPanel({ state }: { state: HouseState }) {
     <Panel className="p-3 md:p-4" accent="purple">
       <div className="flex items-center justify-between flex-wrap gap-2 mb-2.5">
         <h3 className="text-sm font-bold uppercase tracking-wider flex items-center gap-2 text-purple-3">
-          <CloudSun size={16} /> Weather
+          <CloudSun size={16} /> {t("weather.title")}
         </h3>
         <div className="flex items-center gap-2 flex-wrap justify-end">
           <Badge tone={liveWeatherActive ? "nominal" : "paper"}>
-            <Satellite size={11} /> {liveWeatherActive ? "Live forecast" : "Modelled (offline/out of range)"}
+            <Satellite size={11} /> {liveWeatherActive ? t("weather.liveForecast") : t("weather.modelledOffline")}
           </Badge>
           {crossing ? (
             <Badge tone={crossing.direction === "above" ? "danger" : "info"}>
-              Band crossing in ~{crossing.hoursFromNow}h ({crossing.direction})
+              {t("weather.bandCrossingIn", { hours: crossing.hoursFromNow, direction: t(`weather.${crossing.direction}`) })}
             </Badge>
           ) : (
-            <Badge tone="nominal">No band crossing forecast (18h)</Badge>
+            <Badge tone="nominal">{t("weather.noBandCrossing", { hours: 18 })}</Badge>
           )}
         </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-2 mb-2.5">
-        <ConditionTile icon={<Thermometer size={11} />} label="Outdoor Temp" value={tempC.toFixed(1)} unit="°C" />
-        <ConditionTile icon={<Droplets size={11} />} label="Outdoor RH" value={rh.toFixed(0)} unit="%" />
-        <ConditionTile icon={<WeatherIcon solarWm2={solarWm2} size={11} />} label="Solar" value={solarWm2.toFixed(0)} unit="W/m²" />
-        <ConditionTile icon={<Wind size={11} />} label="Outdoor VPD" value={outdoorVpd.toFixed(2)} unit="kPa" color="#7d559c" />
-        <ConditionTile icon={<CloudDrizzle size={11} />} label="Dew Point" value={outdoorDewPoint.toFixed(1)} unit="°C" />
+        <ConditionTile icon={<Thermometer size={11} />} label={t("weather.outdoorTemp")} value={tempC.toFixed(1)} unit="°C" />
+        <ConditionTile icon={<Droplets size={11} />} label={t("weather.outdoorRh")} value={rh.toFixed(0)} unit="%" />
+        <ConditionTile icon={<WeatherIcon solarWm2={solarWm2} size={11} />} label={t("weather.solar")} value={solarWm2.toFixed(0)} unit="W/m²" />
+        <ConditionTile icon={<Wind size={11} />} label={t("weather.outdoorVpd")} value={outdoorVpd.toFixed(2)} unit="kPa" color="#7d559c" />
+        <ConditionTile icon={<CloudDrizzle size={11} />} label={t("weather.dewPoint")} value={outdoorDewPoint.toFixed(1)} unit="°C" />
       </div>
 
       <div className="flex gap-1.5 overflow-x-auto pb-1 mb-2.5">
@@ -87,7 +89,7 @@ export function WeatherPanel({ state }: { state: HouseState }) {
           const v = vpd(o.tempC, o.rh);
           return (
             <div key={h} className="border-2 border-ink bg-paper p-1.5 flex flex-col items-center gap-0.5 min-w-[52px] shrink-0">
-              <span className="text-[9px] font-mono text-ink/60">{h === 0 ? "NOW" : clockAt(state.dayFraction, h)}</span>
+              <span className="text-[9px] font-mono text-ink/60">{h === 0 ? t("weather.now") : clockAt(state.dayFraction, h)}</span>
               <WeatherIcon solarWm2={o.solarWm2} size={13} className="text-purple-3" />
               <span className="text-[11px] font-mono font-bold">{o.tempC.toFixed(0)}°C</span>
               <span className="text-[9px] font-mono text-ink/50">{v.toFixed(2)} kPa</span>
@@ -98,11 +100,7 @@ export function WeatherPanel({ state }: { state: HouseState }) {
 
       <VpdForecastChart series={series} crossing={crossing} height={130} />
       <p className="text-[10px] font-mono text-ink/50 mt-1.5">
-        Outdoor/ambient VPD forecast, the condition the zone controller works against, not a leaf-VPD
-        prediction.{" "}
-        {liveWeatherActive
-          ? "Real hourly forecast (Open-Meteo, IIT Guwahati) where in range, blending into the twin's own model beyond it."
-          : "Live forecast unavailable right now (offline or simulated time has run past the fetched window), showing the twin's own deterministic model instead."}
+        {liveWeatherActive ? t("weather.captionLive") : t("weather.captionModelled")}
       </p>
     </Panel>
   );

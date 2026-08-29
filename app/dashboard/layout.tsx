@@ -8,9 +8,12 @@ import { AnimatePresence, motion } from "motion/react";
 import { SimulationProvider } from "@/lib/SimulationContext";
 import { DashboardNav } from "@/components/DashboardNav";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const { t } = useLanguage();
 
   return (
     <SimulationProvider>
@@ -29,13 +32,14 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
               <span className="text-purple-1">AAS</span>
             </span>
           </Link>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <Link
               href="/"
               className="text-[11px] font-mono uppercase tracking-wider text-shell-invert/60 hover:text-shell-invert"
             >
-              ← Home
+              ← {t("common.home")}
             </Link>
+            <LanguageSwitcher />
             <ThemeToggle />
           </div>
         </header>
@@ -58,12 +62,9 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
         <footer className="border-t-[3px] border-green-1 bg-shell px-4 md:px-8 py-4 flex flex-col items-center gap-2 text-center">
           <span className="inline-flex items-center gap-1.5 border-2 border-shell-invert/30 text-shell-invert/50 px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider">
-            L0 Driver: Simulated Twin, API boundary ready for ESP32/MQTT
+            {t("footer.l0Driver")}
           </span>
-          <p className="text-[11px] font-mono text-shell-invert/40">
-            ABHAAS · Team Nirvaah · PS3 Smart Polyhouse Management Interface · Avinya 2026 · Prakriti ×
-            Techniche · IIT Guwahati
-          </p>
+          <p className="text-[11px] font-mono text-shell-invert/40">{t("footer.credit")}</p>
         </footer>
       </div>
     </SimulationProvider>

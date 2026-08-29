@@ -4,6 +4,7 @@ import { useCallback, useRef, useState } from "react";
 import Webcam from "react-webcam";
 import { Bug, RotateCcw, Zap } from "lucide-react";
 import { useSimulation } from "@/lib/SimulationContext";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { classifyLeaf, type ClassificationResult } from "@/lib/pestClassifier";
 import { LeafCaptureStage, type CaptureStage } from "@/components/scan/LeafCapture";
 import { PredictiveContext } from "@/components/scan/PredictiveContext";
@@ -15,6 +16,7 @@ type Stage = CaptureStage | "result";
 
 export function PestScanner() {
   const { state } = useSimulation();
+  const { t } = useLanguage();
   const webcamRef = useRef<Webcam>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [stage, setStage] = useState<Stage>("idle");
@@ -61,12 +63,9 @@ export function PestScanner() {
     <div className="flex flex-col gap-4">
       <div>
         <h2 className="text-2xl font-bold flex items-center gap-2">
-          <Bug size={22} /> Pest ID
+          <Bug size={22} /> {t("pest.title")}
         </h2>
-        <p className="text-sm text-shell-invert/60 font-mono mt-1">
-          Scan a leaf. A lightweight on-device model flags the pest, swappable for a real ONNX/TF.js
-          model later. Fused with the live environmental state for extra confidence.
-        </p>
+        <p className="text-sm text-shell-invert/60 font-mono mt-1">{t("pest.subtitle")}</p>
       </div>
 
       {stage !== "result" && (
@@ -81,8 +80,8 @@ export function PestScanner() {
           onFile={handleFile}
           onAnalyze={runScan}
           onRetake={reset}
-          captureLabel="Scan Leaf"
-          scanningLabel="Analysing..."
+          captureLabel={t("common.scanLeaf")}
+          scanningLabel={t("common.analysing")}
         />
       )}
 
@@ -93,20 +92,20 @@ export function PestScanner() {
               <PredictiveContext zone={hottestZone} />
               <div className="md:border-l-[3px] md:border-ink md:pl-6 flex flex-col gap-1">
                 <p className="text-xs font-bold uppercase tracking-widest text-ink/60 flex items-center gap-2">
-                  <Bug size={14} /> CV inference
+                  <Bug size={14} /> {t("pest.cvInference")}
                 </p>
                 <div className="flex items-start justify-between gap-4 flex-wrap mt-1">
                   <div>
-                    <Badge tone="danger">Pest Detected</Badge>
-                    <p className="text-2xl md:text-3xl font-bold mt-2 uppercase">{result.pest.name}</p>
-                    <p className="text-xs font-mono text-ink/60 mt-1">Confidence {result.confidence}%</p>
+                    <Badge tone="danger">{t("pest.pestDetected")}</Badge>
+                    <p className="text-2xl md:text-3xl font-bold mt-2 uppercase">{t(`pestList.${result.pest.id}.name`)}</p>
+                    <p className="text-xs font-mono text-ink/60 mt-1">{t("common.confidence")} {result.confidence}%</p>
                   </div>
                   <div className="border-[3px] border-ink bg-paper-dim px-4 py-3 text-center">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-ink/60">Confidence</p>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-ink/60">{t("common.confidence")}</p>
                     <p className="font-mono text-3xl font-bold">{result.confidence}%</p>
                   </div>
                 </div>
-                <p className="text-sm text-ink/70 mt-4 leading-relaxed">{result.pest.treatment}</p>
+                <p className="text-sm text-ink/70 mt-4 leading-relaxed">{t(`pestList.${result.pest.id}.treatment`)}</p>
               </div>
             </div>
           </Panel>
@@ -114,20 +113,20 @@ export function PestScanner() {
           {result.pest.highVpd && hottestZone && (
             <Panel accent="danger" className="p-5">
               <p className="text-xs font-bold uppercase tracking-widest text-danger mb-2 flex items-center gap-2">
-                <Zap size={14} /> Environmental cross-reference
+                <Zap size={14} /> {t("pest.environmentalCrossReference")}
               </p>
               <p className="text-sm text-ink/80 leading-relaxed">
-                <span className="font-bold">{hottestZone.label}</span> is currently at{" "}
-                <span className="font-mono font-bold">{hottestZone.vpdLeaf.toFixed(2)} kPa</span> leaf VPD,
-                the highest in the house, and exactly the high-VPD, low-humidity condition {result.pest.name.toLowerCase()}{" "}
-                favour. The controller is already managing this zone for plant stress; the same number is
-                now also a pest-risk signal.
+                {t("pest.envCrossRefBody", {
+                  zone: t(`zone.${hottestZone.id}.label`),
+                  vpd: hottestZone.vpdLeaf.toFixed(2),
+                  pest: t(`pestList.${result.pest.id}.name`).toLowerCase(),
+                })}
               </p>
             </Panel>
           )}
 
           <Button tone="ink" onClick={reset} className="self-start flex items-center gap-2">
-            <RotateCcw size={14} /> Scan Another Leaf
+            <RotateCcw size={14} /> {t("common.scanAnotherLeaf")}
           </Button>
         </div>
       )}

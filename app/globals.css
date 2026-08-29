@@ -91,6 +91,27 @@ h4 {
   font-family: var(--font-mono), ui-monospace, "SF Mono", monospace;
 }
 
+/* None of the 12 non-English locales have upper/lowercase distinctions
+   (Brahmic scripts + Urdu/Arabic) — CSS text-transform: uppercase on them
+   is meaningless and makes Chromium mis-shape conjunct clusters into
+   missing-glyph tofu boxes. Disable it site-wide whenever a non-English
+   locale is active (see lib/i18n/LanguageContext.tsx for the attribute). */
+html:not([data-locale="en"]) .uppercase,
+html:not([data-locale="en"]) h1,
+html:not([data-locale="en"]) h2,
+html:not([data-locale="en"]) h3,
+html:not([data-locale="en"]) h4 {
+  text-transform: none;
+}
+
+/* Same root cause, different property: any non-zero letter-spacing
+   (Tailwind's tracking-* utilities, used everywhere in this brutalist
+   design) forces Chromium to shape each glyph independently instead of as
+   a cluster, which breaks Indic conjuncts/combining marks into tofu too. */
+html:not([data-locale="en"]) [class*="tracking-"] {
+  letter-spacing: normal;
+}
+
 /* brutalist scrollbar */
 ::-webkit-scrollbar {
   height: 10px;

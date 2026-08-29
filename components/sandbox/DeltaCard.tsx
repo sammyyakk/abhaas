@@ -1,3 +1,5 @@
+import { useLanguage } from "@/lib/i18n/LanguageContext";
+
 function fmt(n: number, digits = 1) {
   const sign = n > 0 ? "+" : "";
   return `${sign}${n.toFixed(digits)}`;
@@ -16,6 +18,7 @@ export function DeltaCard({
   lowerIsBetter?: boolean;
   digits?: number;
 }) {
+  const { t } = useLanguage();
   const better = lowerIsBetter ? delta < -0.01 : delta > 0.01;
   const worse = lowerIsBetter ? delta > 0.01 : delta < -0.01;
   const color = better ? "#59931c" : worse ? "#ff2d2d" : "#0a0a0a";
@@ -31,7 +34,7 @@ export function DeltaCard({
         <span className="text-xs font-mono text-ink/50">{unit}</span>
       </div>
       <span className="text-[10px] font-mono uppercase" style={{ color }}>
-        {better ? "better" : worse ? "worse" : "unchanged"}
+        {better ? t("common.better") : worse ? t("common.worse") : t("common.unchanged")}
       </span>
     </div>
   );

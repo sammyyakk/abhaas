@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { FlaskConical, SlidersHorizontal, Cpu, Wind } from "lucide-react";
 import { useSimulation } from "@/lib/SimulationContext";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 import type { SandboxPolicy, SandboxResult } from "@/lib/types";
 import { vpdForecastSeries, findBandCrossing } from "@/lib/vpdForecast";
 import { Panel } from "../ui/Panel";
@@ -14,17 +15,18 @@ import { DeltaCard } from "./DeltaCard";
 
 const DEFAULT_POLICY: SandboxPolicy = { irrigationDeltaPct: 0, ventDelayHrs: 0, shadeShiftHrs: 0 };
 
-const COMPUTE_STAGES = [
-  "Forking twin state...",
-  "Simulating baseline · 24h...",
-  "Simulating with policy change · 24h...",
-  "Computing deltas...",
+const COMPUTE_STAGE_KEYS = [
+  "sandbox.forkingState",
+  "sandbox.simulatingBaseline",
+  "sandbox.simulatingWithChange",
+  "sandbox.computingDeltas",
 ];
 
 const COMPUTE_MS = 1800;
 
 export function SandboxPanel() {
   const { state, runSandbox, getOutdoorForecast, liveWeatherActive } = useSimulation();
+  const { t } = useLanguage();
   const [policy, setPolicy] = useState<SandboxPolicy>(DEFAULT_POLICY);
   const [result, setResult] = useState<SandboxResult | null>(null);
   const [latencyMs, setLatencyMs] = useState<number | null>(null);
@@ -42,8 +44,8 @@ export function SandboxPanel() {
     let i = 0;
     const interval = setInterval(() => {
       i += 1;
-      setStage(i % COMPUTE_STAGES.length);
-    }, COMPUTE_MS / COMPUTE_STAGES.length);
+      setStage(i % COMPUTE_STAGE_KEYS.length);
+    }, COMPUTE_MS / COMPUTE_STAGE_KEYS.length);
 
     setTimeout(() => {
       clearInterval(interval);
@@ -62,18 +64,15 @@ export function SandboxPanel() {
     <div className="flex flex-col gap-4">
       <div>
         <h2 className="text-2xl font-bold flex items-center gap-2">
-          <FlaskConical size={22} /> What-If Sandbox
+          <FlaskConical size={22} /> {t("sandbox.title")}
         </h2>
-        <p className="text-sm text-shell-invert/60 font-mono mt-1">
-          Drag a slider. The twin forks and fast-forwards 24 simulated hours. Results return as a delta
-          versus doing nothing.
-        </p>
+        <p className="text-sm text-shell-invert/60 font-mono mt-1">{t("sandbox.subtitle")}</p>
       </div>
 
       <Panel className="p-5">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <SliderControl
-            label="Irrigation change"
+            label={t("sandbox.irrigationChange")}
             value={policy.irrigationDeltaPct}
             min={-50}
             max={100}
@@ -82,7 +81,7 @@ export function SandboxPanel() {
             onChange={(v) => setPolicy((p) => ({ ...p, irrigationDeltaPct: v }))}
           />
           <SliderControl
-            label="Vent delay"
+            label={t("sandbox.ventDelay")}
             value={policy.ventDelayHrs}
             min={0}
             max={4}
@@ -91,7 +90,7 @@ export function SandboxPanel() {
             onChange={(v) => setPolicy((p) => ({ ...p, ventDelayHrs: v }))}
           />
           <SliderControl
-            label="Shade shift"
+            label={t("sandbox.shadeShift")}
             value={policy.shadeShiftHrs}
             min={-2}
             max={2}
@@ -102,15 +101,13 @@ export function SandboxPanel() {
         </div>
         <div className="mt-5 flex items-center gap-3 flex-wrap">
           <Button tone="purple" onClick={run} disabled={running} className="flex items-center gap-2">
-            <SlidersHorizontal size={16} /> Run 24h Projection
+            <SlidersHorizontal size={16} /> {t("sandbox.run24h")}
           </Button>
           <Button tone="paper" onClick={() => setPolicy(DEFAULT_POLICY)} disabled={running}>
-            Reset
+            {t("common.reset")}
           </Button>
           {latencyMs != null && !running && (
-            <span className="text-[11px] font-mono text-ink/50 ml-1">
-              computed in {latencyMs.toFixed(0)} ms (target &lt; 2000 ms)
-            </span>
+            <span className="text-[11px] font-mono text-ink/50 ml-1">{t("sandbox.computedIn", { ms: latencyMs.toFixed(0) })}</span>
           )}
         </div>
       </Panel>
@@ -118,26 +115,23 @@ export function SandboxPanel() {
       <Panel className="p-5" accent="purple">
         <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
           <h3 className="text-sm font-bold uppercase tracking-wider flex items-center gap-2 text-purple-3">
-            <Wind size={16} /> VPD Forecast, weather-aware control timing
+            <Wind size={16} /> {t("sandbox.vpdForecastTitle")}
           </h3>
           <Badge tone={liveWeatherActive ? "nominal" : "paper"}>
-            {liveWeatherActive ? "Live forecast" : "Modelled (offline/out of range)"}
+            {liveWeatherActive ? t("weather.liveForecast") : t("weather.modelledOffline")}
           </Badge>
         </div>
-        <p className="text-xs font-mono text-ink/60 mb-3">
-          Outdoor VPD forecast against the current target band. The purple marker shows when the controller
-          actually starts responding under the current Vent Delay setting.
-        </p>
+        <p className="text-xs font-mono text-ink/60 mb-3">{t("sandbox.vpdForecastCaption")}</p>
         <div className="flex items-center gap-2 mb-3">
           {crossing ? (
             <Badge tone={crossing.direction === "above" ? "danger" : "info"}>
-              Forecast crossing in ~{crossing.hoursFromNow}h ({crossing.direction})
+              {t("sandbox.forecastCrossingIn", { hours: crossing.hoursFromNow, direction: t(`weather.${crossing.direction}`) })}
             </Badge>
           ) : (
-            <Badge tone="nominal">No band crossing forecast (18h)</Badge>
+            <Badge tone="nominal">{t("weather.noBandCrossing", { hours: 18 })}</Badge>
           )}
           {crossing && policy.ventDelayHrs > 0 && (
-            <Badge tone="paper">Response delayed +{policy.ventDelayHrs}h from crossing</Badge>
+            <Badge tone="paper">{t("sandbox.responseDelayed", { hours: policy.ventDelayHrs })}</Badge>
           )}
         </div>
         <VpdForecastChart series={forecastSeries} crossing={crossing} responseDelayHrs={policy.ventDelayHrs} />
@@ -147,7 +141,7 @@ export function SandboxPanel() {
         <Panel key={runId} accent="purple" className="p-5">
           <div className="flex items-center gap-2 mb-3">
             <Cpu size={18} className="text-purple-3" />
-            <p className="text-xs font-bold uppercase tracking-widest text-purple-3">{COMPUTE_STAGES[stage]}</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-purple-3">{t(COMPUTE_STAGE_KEYS[stage])}</p>
           </div>
           <div className="h-4 border-[3px] border-ink bg-paper-dim overflow-hidden">
             <div className="h-full bg-purple-1 animate-scanfill" style={{ animationDuration: `${COMPUTE_MS}ms` }} />
@@ -158,15 +152,20 @@ export function SandboxPanel() {
       {result && !running && (
         <div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <DeltaCard label="Crop Stress Index" delta={result.delta.csi} unit="pts" lowerIsBetter />
-            <DeltaCard label="Water Used" delta={result.delta.waterL} unit="L" lowerIsBetter />
-            <DeltaCard label="Fungal Risk (DSV)" delta={result.delta.dsv} unit="DSV" lowerIsBetter />
-            <DeltaCard label="DLI Today" delta={result.delta.dli} unit="mol/m²" lowerIsBetter={false} />
+            <DeltaCard label={t("sandbox.cropStressIndex")} delta={result.delta.csi} unit="pts" lowerIsBetter />
+            <DeltaCard label={t("sandbox.waterUsed")} delta={result.delta.waterL} unit="L" lowerIsBetter />
+            <DeltaCard label={t("sandbox.fungalRiskDsv")} delta={result.delta.dsv} unit="DSV" lowerIsBetter />
+            <DeltaCard label={t("sandbox.dliToday")} delta={result.delta.dli} unit="mol/m²" lowerIsBetter={false} />
           </div>
           <p className="mt-3 text-xs font-mono text-shell-invert/50">
-            Baseline (do nothing): CSI {result.baseline.csi.toFixed(0)} · {result.baseline.waterL.toFixed(0)} L ·
-            DSV {result.baseline.dsv.toFixed(0)}, with change: CSI {result.withChange.csi.toFixed(0)} ·{" "}
-            {result.withChange.waterL.toFixed(0)} L · DSV {result.withChange.dsv.toFixed(0)}
+            {t("sandbox.baselineSummary", {
+              baseCsi: result.baseline.csi.toFixed(0),
+              baseWater: result.baseline.waterL.toFixed(0),
+              baseDsv: result.baseline.dsv.toFixed(0),
+              changeCsi: result.withChange.csi.toFixed(0),
+              changeWater: result.withChange.waterL.toFixed(0),
+              changeDsv: result.withChange.dsv.toFixed(0),
+            })}
           </p>
         </div>
       )}

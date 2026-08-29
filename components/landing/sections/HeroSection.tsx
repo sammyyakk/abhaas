@@ -1,18 +1,23 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { Users, Sprout, Trophy, ArrowDown, ArrowRight } from "lucide-react";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
-const TICKER = [
-  "NO CONTRADICTORY COMMANDS",
-  "UNIFIED LEAF VPD",
-  "BUDGET OPTIMISED",
-  "ZONE-AWARE",
-  "STAGE-AWARE",
-  "FAULT-AWARE",
-  "REHEARSABLE",
+const TICKER_KEYS = [
+  "landing.ticker1",
+  "landing.ticker2",
+  "landing.ticker3",
+  "landing.ticker4",
+  "landing.ticker5",
+  "landing.ticker6",
+  "landing.ticker7",
 ];
 
 export function HeroSection() {
+  const { t } = useLanguage();
+  const ticker = TICKER_KEYS.map((k) => t(k));
   return (
     <section className="relative min-h-screen flex flex-col justify-center overflow-hidden border-b-[6px] border-green-1">
       <div
@@ -60,25 +65,23 @@ export function HeroSection() {
               <span className="text-purple-1">AAS</span>
             </h1>
             <p className="mt-6 inline-block bg-purple-1/15 px-2 text-2xl md:text-4xl font-bold uppercase tracking-tight">
-              Rehearse before you act.
+              {t("landing.heroTagline")}
             </p>
             <p className="mt-4 text-base md:text-lg font-mono text-shell-invert/70 max-w-2xl mx-auto md:mx-0">
-              Every other team ships an alerting tool: read a sensor, cross a threshold, print a
-              warning. Abhaas is a growth-stage-aware digital twin, it turns that alert into a
-              decision you can test first.
+              {t("landing.heroBody")}
             </p>
             <div className="mt-8 flex flex-wrap items-center justify-center md:justify-start gap-4">
               <Link
                 href="/dashboard/twin"
                 className="inline-flex items-center gap-2 bg-green-1 text-ink border-[3px] border-shell-invert px-8 py-4 text-base font-bold uppercase tracking-widest shadow-[8px_8px_0_var(--shadow-ink)] hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-[5px_5px_0_var(--shadow-ink)] transition-transform"
               >
-                Enter Twin <ArrowDown size={18} />
+                {t("landing.enterTwin")} <ArrowDown size={18} />
               </Link>
               <a
                 href="#problem"
                 className="inline-flex items-center gap-1.5 text-sm font-bold uppercase tracking-widest text-shell-invert/60 hover:text-shell-invert transition-colors"
               >
-                See the problem <ArrowRight size={14} />
+                {t("landing.seeTheProblem")} <ArrowRight size={14} />
               </a>
             </div>
           </div>
@@ -87,7 +90,7 @@ export function HeroSection() {
 
       <div className="relative border-t-[3px] border-shell-invert/20 bg-ink text-paper overflow-hidden py-2.5 mt-auto">
         <div className="flex whitespace-nowrap animate-marquee w-max">
-          {[...TICKER, ...TICKER].map((word, i) => (
+          {[...ticker, ...ticker].map((word, i) => (
             <span key={i} className="mx-4 text-xs font-bold uppercase tracking-widest font-mono">
               {word} <span className="text-purple-2 mx-3">{"//"}</span>
             </span>

@@ -2,6 +2,7 @@
 
 import { Droplets, ArrowRight, CloudRainWind, Gauge, CalendarClock, Wrench, TrendingUp } from "lucide-react";
 import { useSimulation } from "@/lib/SimulationContext";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { yieldResponse, computeYieldEfficiency, type YieldEfficiency } from "@/lib/yield";
 import type { ZoneState } from "@/lib/types";
 import { Panel } from "../ui/Panel";
@@ -12,7 +13,7 @@ import { clamp } from "@/lib/weather";
 const ZONE_COLORS: Record<string, string> = { vent: "#67cf00", centre: "#6add2b", far: "#59931c" };
 const GUTTER_CYCLE_DAYS = 5;
 
-function YieldCurve({ zones }: { zones: ZoneState[] }) {
+function YieldCurve({ zones, ariaLabel }: { zones: ZoneState[]; ariaLabel: string }) {
   const width = 400;
   const height = 150;
   const marginL = 34;
@@ -30,7 +31,7 @@ function YieldCurve({ zones }: { zones: ZoneState[] }) {
   }).join(" ");
 
   return (
-    <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto" role="img" aria-label="Yield response curve">
+    <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto" role="img" aria-label={ariaLabel}>
       <line x1={marginL} y1={10} x2={marginL} y2={height - marginB} stroke="currentColor" strokeOpacity={0.25} strokeWidth={1.5} />
       <line x1={marginL} y1={height - marginB} x2={width - 10} y2={height - marginB} stroke="currentColor" strokeOpacity={0.25} strokeWidth={1.5} />
       <text x={2} y={y(yMax) + 4} fontSize={9} fontFamily="var(--font-mono)" fill="currentColor" opacity={0.6}>
@@ -55,14 +56,15 @@ function YieldCurve({ zones }: { zones: ZoneState[] }) {
   );
 }
 
-function nextLiterCopy(eff: YieldEfficiency, zones: ZoneState[]) {
+function nextLiterCopy(eff: YieldEfficiency, zones: ZoneState[], t: (path: string, params?: Record<string, string | number>) => string) {
   const zone = zones.find((z) => z.id === eff.bestMarginalZoneId);
   if (!zone) return null;
-  return `Optimized: next liter → ${zone.label} (highest marginal return)`;
+  return t("ledger.nextLiterCopy", { zone: t(`zone.${zone.id}.label`) });
 }
 
 export function WaterLedger() {
   const { state } = useSimulation();
+  const { t } = useLanguage();
   const { budgetL, usedL, recoveredL, allocation } = state.waterLedger;
   const remainingL = Math.max(0, budgetL - usedL);
   const usedPct = Math.min(100, (usedL / budgetL) * 100);
@@ -78,23 +80,21 @@ export function WaterLedger() {
     <div className="flex flex-col gap-4">
       <div>
         <h2 className="text-2xl font-bold flex items-center gap-2">
-          <Droplets size={22} /> Water Ledger
+          <Droplets size={22} /> {t("ledger.title")}
         </h2>
-        <p className="text-sm text-shell-invert/60 font-mono mt-1">
-          A fixed daily budget, allocated by marginal return, not watered reactively.
-        </p>
+        <p className="text-sm text-shell-invert/60 font-mono mt-1">{t("ledger.subtitle")}</p>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <StatTile label="Daily Budget" value={budgetL.toFixed(1)} unit="L" />
-        <StatTile label="Used Today" value={usedL.toFixed(1)} unit="L" color="#59931c" />
-        <StatTile label="Remaining" value={remainingL.toFixed(1)} unit="L" color="#7d559c" />
-        <StatTile label="Condensation Credit" value={`+${recoveredL.toFixed(1)}`} unit="L" color="#b273e9" />
+        <StatTile label={t("ledger.dailyBudget")} value={budgetL.toFixed(1)} unit="L" />
+        <StatTile label={t("ledger.usedToday")} value={usedL.toFixed(1)} unit="L" color="#59931c" />
+        <StatTile label={t("ledger.remaining")} value={remainingL.toFixed(1)} unit="L" color="#7d559c" />
+        <StatTile label={t("ledger.condensationCredit")} value={`+${recoveredL.toFixed(1)}`} unit="L" color="#b273e9" />
       </div>
 
       <Panel className="p-5">
         <h3 className="text-sm font-bold uppercase tracking-wider mb-3 flex items-center gap-2">
-          Budget <ArrowRight size={16} /> Zone allocation
+          {t("ledger.budgetToZone")} <ArrowRight size={16} /> {t("ledger.zoneAllocation")}
         </h3>
         <div className="border-[3px] border-ink h-10 flex overflow-hidden">
           {state.zones.map((z) => {
@@ -105,21 +105,21 @@ export function WaterLedger() {
                 key={z.id}
                 className="h-full flex items-center justify-center text-[10px] font-mono font-bold text-ink border-r-[3px] border-ink last:border-r-0"
                 style={{ width: `${pct}%`, background: ZONE_COLORS[z.id] }}
-                title={`${z.label}: ${liters.toFixed(1)} L`}
+                title={`${t(`zone.${z.id}.label`)}: ${liters.toFixed(1)} L`}
               >
                 {pct > 8 ? `${liters.toFixed(1)}L` : ""}
               </div>
             );
           })}
           <div className="h-full flex-1 bg-paper-dim flex items-center justify-center text-[10px] font-mono text-ink/40">
-            {usedPct < 92 ? `${remainingL.toFixed(0)}L unallocated` : ""}
+            {usedPct < 92 ? t("ledger.unallocated", { liters: remainingL.toFixed(0) }) : ""}
           </div>
         </div>
         <div className="mt-3 flex flex-wrap gap-4">
           {state.zones.map((z) => (
             <span key={z.id} className="flex items-center gap-2 text-xs font-mono text-ink/70">
               <span className="w-3 h-3 border-2 border-ink inline-block" style={{ background: ZONE_COLORS[z.id] }} />
-              {z.label}: {(allocation[z.id] ?? 0).toFixed(1)} L today
+              {t(`zone.${z.id}.label`)}: {t("ledger.todayLiters", { liters: (allocation[z.id] ?? 0).toFixed(1) })}
             </span>
           ))}
         </div>
@@ -127,54 +127,51 @@ export function WaterLedger() {
 
       <Panel className="p-5" accent="green">
         <h3 className="text-sm font-bold uppercase tracking-wider mb-4 flex items-center gap-2 text-green-3">
-          <TrendingUp size={16} /> Yield Efficiency Index
+          <TrendingUp size={16} /> {t("ledger.yieldEfficiencyIndex")}
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <div className="grid grid-cols-2 gap-3 mb-4">
               <StatTile
-                label="Water Productivity"
+                label={t("ledger.waterProductivity")}
                 value={yieldEff.waterProductivityGPerL.toFixed(0)}
                 unit="g/L"
                 color="#59931c"
               />
               <StatTile
-                label="Projected Yield Gain"
+                label={t("ledger.projectedYieldGain")}
                 value={`${yieldEff.projectedYieldGainPct >= 0 ? "+" : ""}${yieldEff.projectedYieldGainPct.toFixed(1)}`}
                 unit="%"
                 color="#7d559c"
-                sub="vs. equal-split baseline"
+                sub={t("ledger.vsEqualSplit")}
               />
             </div>
-            {nextLiterCopy(yieldEff, state.zones) && (
+            {nextLiterCopy(yieldEff, state.zones, t) && (
               <p className="text-xs font-mono text-ink/70 border-[3px] border-ink bg-paper-dim p-3">
-                {nextLiterCopy(yieldEff, state.zones)}
+                {nextLiterCopy(yieldEff, state.zones, t)}
               </p>
             )}
-            <p className="text-[11px] font-mono text-ink/50 mt-3">
-              Modelled Mitscherlich/Doorenbos-Kassam-style yield-response curve, a defensible scaffold, not
-              a fitted agronomic model.
-            </p>
+            <p className="text-[11px] font-mono text-ink/50 mt-3">{t("ledger.yieldCurveCaption")}</p>
           </div>
-          <YieldCurve zones={state.zones} />
+          <YieldCurve zones={state.zones} ariaLabel={t("ledger.yieldCurveAriaLabel")} />
         </div>
       </Panel>
 
       <Panel className="p-5" accent="purple">
         <h3 className="text-sm font-bold uppercase tracking-wider mb-4 flex items-center gap-2 text-purple-3">
-          <Gauge size={16} /> Passive Harvesting Helper: dew point &amp; runoff predictor
+          <Gauge size={16} /> {t("ledger.passiveHarvestingHelper")}
         </h3>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-          <StatTile label="Forecast Tonight" value={`+${forecastRecoveryL.toFixed(1)}`} unit="L" color="#7d559c" />
-          <StatTile label="Avg Dew Point" value={avgDewPointNow.toFixed(1)} unit="°C" />
+          <StatTile label={t("ledger.forecastTonight")} value={`+${forecastRecoveryL.toFixed(1)}`} unit="L" color="#7d559c" />
+          <StatTile label={t("ledger.avgDewPoint")} value={avgDewPointNow.toFixed(1)} unit="°C" />
           <StatTile
-            label="Next Gutter Check"
-            value={daysToInspection === 0 ? "Due" : daysToInspection}
+            label={t("ledger.nextGutterCheck")}
+            value={daysToInspection === 0 ? t("ledger.due") : daysToInspection}
             unit={daysToInspection === 0 ? "" : "d"}
             color={daysToInspection === 0 ? "#ff2d2d" : undefined}
           />
-          <StatTile label="Cycle" value={GUTTER_CYCLE_DAYS} unit="days" />
+          <StatTile label={t("ledger.cycle")} value={GUTTER_CYCLE_DAYS} unit="days" />
         </div>
 
         <div className="border-[3px] border-ink bg-paper-dim p-3 flex flex-col gap-2">
@@ -183,14 +180,14 @@ export function WaterLedger() {
             const condensing = gap < 1.5;
             return (
               <div key={z.id} className="flex items-center justify-between text-xs font-mono">
-                <span className="font-bold uppercase">{z.label}</span>
+                <span className="font-bold uppercase">{t(`zone.${z.id}.label`)}</span>
                 <span className="text-ink/60">
-                  air {z.airTemp.toFixed(1)}°C · dew {z.dewPoint.toFixed(1)}°C · gap {gap.toFixed(1)}°C
+                  {t("ledger.airDewGap", { air: z.airTemp.toFixed(1), dew: z.dewPoint.toFixed(1), gap: gap.toFixed(1) })}
                 </span>
                 {condensing ? (
-                  <Badge tone="info">Condensing</Badge>
+                  <Badge tone="info">{t("ledger.condensing")}</Badge>
                 ) : (
-                  <Badge tone="paper">Dry</Badge>
+                  <Badge tone="paper">{t("ledger.dry")}</Badge>
                 )}
               </div>
             );
@@ -199,27 +196,19 @@ export function WaterLedger() {
 
         <p className="text-xs font-mono text-ink/70 leading-relaxed mt-4">
           <span className="font-bold text-purple-3 inline-flex items-center gap-1.5">
-            <CloudRainWind size={14} /> Passive condensation recovery:
+            <CloudRainWind size={14} /> {t("ledger.condensationRecovery")}
           </span>{" "}
-          when a zone&apos;s cover cools below dew point overnight, moisture condenses and drains through
-          internal gutters at zero energy cost. Modelled from the twin&apos;s own dew-point state and
-          credited to tomorrow&apos;s budget. Ventilation losses still dominate the moisture balance, this
-          is a modest, honest secondary credit, not the headline.
+          {t("ledger.condensationBody")}
         </p>
 
         <p className="text-xs font-mono text-ink/60 leading-relaxed mt-3 flex items-start gap-1.5">
-          <Wrench size={13} className="shrink-0 mt-0.5" /> Gutter maintenance reminders fire automatically
-          every {GUTTER_CYCLE_DAYS} days into the Advisory Feed, a blocked or algae-fouled gutter fails
-          silently, so the twin checks in on a schedule instead of waiting to be asked.
+          <Wrench size={13} className="shrink-0 mt-0.5" /> {t("ledger.gutterReminderBody", { days: GUTTER_CYCLE_DAYS })}
         </p>
       </Panel>
 
       <Panel className="p-4 flex items-center gap-3" accent="ink">
         <CalendarClock size={20} className="text-ink/50 shrink-0" />
-        <p className="text-xs font-mono text-ink/60">
-          Roadmap: real gutter geometry + roof-area-driven yield estimation. Today&apos;s model uses a
-          dew-point proxy, directionally correct, not a plumbing simulation.
-        </p>
+        <p className="text-xs font-mono text-ink/60">{t("ledger.roadmapBody")}</p>
       </Panel>
     </div>
   );

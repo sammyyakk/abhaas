@@ -90,8 +90,13 @@ export interface HarvestAdvisory {
   priceAtRipeness: number;
   pctChange: number;
   action: HarvestAction;
-  headline: string;
-  rationale: string;
+  // i18n keys into lib/i18n/dictionary.ts's `harvestAdvisory.*`, resolved +
+  // interpolated at render time so the same computed advisory renders in
+  // whichever language is active.
+  headlineKey: string;
+  headlineParams?: Record<string, string | number>;
+  rationaleKey: string;
+  rationaleParams?: Record<string, string | number>;
 }
 
 export function computeHarvestAdvisory(gddSum: number, dayIndex: number): HarvestAdvisory {
@@ -110,31 +115,36 @@ export function computeHarvestAdvisory(gddSum: number, dayIndex: number): Harves
     return {
       ...base,
       action: "harvest_now",
-      headline: `Harvest now: fruit at peak ripeness (ΣGDD ${gddSum.toFixed(0)})`,
-      rationale:
-        "GDD accumulation has crossed the ripening threshold. Delaying further risks quality loss regardless of price.",
+      headlineKey: "harvestAdvisory.harvestNow.headline",
+      headlineParams: { gdd: gddSum.toFixed(0) },
+      rationaleKey: "harvestAdvisory.harvestNow.rationale",
     };
   }
   if (pctChange > 5) {
     return {
       ...base,
       action: "delay",
-      headline: `Delay harvest ${daysToRipen} day${daysToRipen === 1 ? "" : "s"}, mandi price projected +${pctChange.toFixed(0)}%`,
-      rationale: `GDD index indicates peak ripeness in ${daysToRipen} days, and local mandi prices are trending up over that window.`,
+      headlineKey: "harvestAdvisory.delay.headline",
+      headlineParams: { days: daysToRipen, pct: pctChange.toFixed(0) },
+      rationaleKey: "harvestAdvisory.delay.rationale",
+      rationaleParams: { days: daysToRipen },
     };
   }
   if (pctChange < -5) {
     return {
       ...base,
       action: "harvest_early",
-      headline: `Price pressure ahead: down ${Math.abs(pctChange).toFixed(0)}% by the time fruit ripens`,
-      rationale: `Consider weighing a slightly-under-ripe early harvest against the ${daysToRipen}-day maturity gap.`,
+      headlineKey: "harvestAdvisory.priceEarly.headline",
+      headlineParams: { pct: Math.abs(pctChange).toFixed(0) },
+      rationaleKey: "harvestAdvisory.priceEarly.rationale",
+      rationaleParams: { days: daysToRipen },
     };
   }
   return {
     ...base,
     action: "on_track",
-    headline: `On track: harvest in ~${daysToRipen} days`,
-    rationale: "Price is expected to stay roughly flat over the remaining ripening window.",
+    headlineKey: "harvestAdvisory.onTrack.headline",
+    headlineParams: { days: daysToRipen },
+    rationaleKey: "harvestAdvisory.onTrack.rationale",
   };
 }

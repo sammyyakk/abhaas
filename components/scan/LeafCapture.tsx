@@ -5,6 +5,7 @@ import Webcam from "react-webcam";
 import { Camera, Upload, ScanSearch, RotateCcw } from "lucide-react";
 import { Panel } from "@/components/ui/Panel";
 import { Button } from "@/components/ui/Button";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 export type CaptureStage = "idle" | "preview" | "scanning";
 
@@ -47,6 +48,7 @@ export function LeafCaptureStage({
   captureLabel?: string;
   scanningLabel?: string;
 }) {
+  const { t } = useLanguage();
   if (stage === "idle") {
     return (
       <Panel className="p-5">
@@ -62,7 +64,7 @@ export function LeafCaptureStage({
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-paper/50 font-mono text-sm text-center px-4">
-              Camera unavailable, use &quot;upload a photo&quot; below instead.
+              {t("common.cameraUnavailable")}
             </div>
           )}
           <CornerBrackets />
@@ -81,7 +83,7 @@ export function LeafCaptureStage({
             onClick={() => fileInputRef.current?.click()}
             className="text-xs font-mono uppercase tracking-wider text-ink/50 hover:text-ink underline flex items-center gap-1.5"
           >
-            <Upload size={12} /> or upload a photo instead
+            <Upload size={12} /> {t("common.orUploadPhoto")}
           </button>
           <input
             ref={fileInputRef}
@@ -101,7 +103,7 @@ export function LeafCaptureStage({
       <Panel className="p-5">
         <div className="relative border-[3px] border-ink bg-ink aspect-video max-w-xl mx-auto overflow-hidden">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={image} alt="Captured leaf" className="w-full h-full object-cover" />
+          <img src={image} alt={t("common.scanLeaf")} className="w-full h-full object-cover" />
           <CornerBrackets />
           {stage === "scanning" && (
             <div className="absolute inset-x-0 bottom-0 bg-ink/80 p-3">
@@ -117,10 +119,10 @@ export function LeafCaptureStage({
         {stage === "preview" && (
           <div className="flex items-center justify-center gap-3 mt-5">
             <Button tone="purple" className="text-base px-8 py-4 flex items-center gap-2" onClick={onAnalyze}>
-              <ScanSearch size={18} /> Analyze
+              <ScanSearch size={18} /> {t("common.analyze")}
             </Button>
             <Button tone="paper" onClick={onRetake} className="flex items-center gap-2">
-              <RotateCcw size={14} /> Retake
+              <RotateCcw size={14} /> {t("common.retake")}
             </Button>
           </div>
         )}

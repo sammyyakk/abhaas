@@ -43,8 +43,13 @@ export interface FaultFlag {
   id: string;
   zoneId: ZoneId;
   kind: FaultKind;
-  message: string;
-  detail: string;
+  // i18n keys into lib/i18n/dictionary.ts's `fault.*`, resolved + interpolated
+  // at render time (not baked into a fixed-language string here) so the same
+  // engine state renders in whichever language is active.
+  messageKey: string;
+  messageParams?: Record<string, string | number>;
+  detailKey: string;
+  detailParams?: Record<string, string | number>;
   timestamp: number;
 }
 
@@ -56,8 +61,12 @@ export interface Advisory {
   zoneId: ZoneId | null;
   kind: AdvisoryKind;
   severity: AdvisorySeverity;
-  headline: string;
-  rationale: string;
+  // i18n keys into lib/i18n/dictionary.ts's `advisory.*`, resolved +
+  // interpolated at render time, same reasoning as FaultFlag above.
+  headlineKey: string;
+  headlineParams?: Record<string, string | number>;
+  rationaleKey: string;
+  rationaleParams?: Record<string, string | number>;
   timestamp: number;
   quantity?: { value: number; unit: string };
 }

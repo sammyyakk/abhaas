@@ -16,12 +16,15 @@ import type {
 export const DT_MINUTES = 20; // simulated minutes advanced per engine tick
 export const BASE_BUDGET_L = 100;
 
+// `id` keys into lib/i18n/dictionary.ts's `stage.*` — HouseState.stage stores
+// this id, not a display name, so the growth stage renders in whichever
+// language is active rather than being frozen to English at generation time.
 const STAGES = [
-  { name: "Seedling", gdd: 0, day: [0.5, 1.0], night: [0.35, 0.55] },
-  { name: "Vegetative", gdd: 250, day: [0.8, 1.1], night: [0.4, 0.6] },
-  { name: "Flowering / fruit set", gdd: 600, day: [0.8, 1.2], night: [0.5, 0.7] },
-  { name: "Fruit development", gdd: 950, day: [1.0, 1.4], night: [0.6, 0.8] },
-  { name: "Ripening", gdd: 1400, day: [1.0, 1.5], night: [0.6, 0.9] },
+  { id: "seedling", name: "Seedling", gdd: 0, day: [0.5, 1.0], night: [0.35, 0.55] },
+  { id: "vegetative", name: "Vegetative", gdd: 250, day: [0.8, 1.1], night: [0.4, 0.6] },
+  { id: "flowering", name: "Flowering / fruit set", gdd: 600, day: [0.8, 1.2], night: [0.5, 0.7] },
+  { id: "fruitDev", name: "Fruit development", gdd: 950, day: [1.0, 1.4], night: [0.6, 0.8] },
+  { id: "ripening", name: "Ripening", gdd: 1400, day: [1.0, 1.5], night: [0.6, 0.9] },
 ] as const;
 
 export function stageForGdd(gdd: number) {
@@ -97,7 +100,7 @@ export function initHouseState(): HouseState {
     dayIndex: 0,
     dayFraction,
     gddSum: 0,
-    stage: STAGES[0].name,
+    stage: STAGES[0].id,
     outdoor: outdoorAt(dayFraction),
     zones,
     advisories: [],
@@ -293,20 +296,34 @@ function clockLabel(dayFraction: number, addMinutes = 0) {
   return `${h}:${m}`;
 }
 
-let advisoryCounter = 0;
-let faultCounter = 0;
-
+// IDs are derived from (simMinutes, zone, kind) rather than a module-level
+// counter: simMinutes persists and keeps increasing across reloads (see
+// SimulationContext's localStorage restore), but a plain counter resets to 0
+// on every fresh module load, colliding with ids already sitting in the
+// restored advisories/faults arrays and breaking React's key uniqueness.
 function makeAdvisory(
   zoneId: ZoneId | null,
   kind: AdvisoryKind,
   severity: AdvisorySeverity,
-  headline: string,
-  rationale: string,
+  headlineKey: string,
+  headlineParams: Record<string, string | number> | undefined,
+  rationaleKey: string,
+  rationaleParams: Record<string, string | number> | undefined,
   timestamp: number,
   quantity?: { value: number; unit: string }
 ): Advisory {
-  advisoryCounter += 1;
-  return { id: `adv-${advisoryCounter}`, zoneId, kind, severity, headline, rationale, timestamp, quantity };
+  return {
+    id: `adv-${timestamp}-${zoneId ?? "house"}-${kind}`,
+    zoneId,
+    kind,
+    severity,
+    headlineKey,
+    headlineParams,
+    rationaleKey,
+    rationaleParams,
+    timestamp,
+    quantity,
+  };
 }
 
 function recentlyAdvised(advisories: Advisory[], zoneId: ZoneId, kind: AdvisoryKind, now: number, cooldown: number) {
@@ -367,8 +384,10 @@ export function tick(
           zone.id,
           "irrigate",
           "action",
-          `${stepped.label}: irrigate ${liters} L before ${clockLabel(dayFraction, 120)}`,
-          `Soil moisture depleted below the readily-available-water threshold; ${liters} L closes the deficit.`,
+          "advisory.irrigate.headline",
+          { liters, time: clockLabel(dayFraction, 120) },
+          "advisory.irrigate.rationale",
+          { liters },
           simMinutes,
           { value: liters, unit: "L" }
         )
@@ -381,8 +400,10 @@ export function tick(
           zone.id,
           "vent",
           "info",
-          `${stepped.label}: increase ventilation, VPD low (fungal risk)`,
-          `Leaf VPD ${stepped.vpdLeaf.toFixed(2)} kPa is below the ${stage.name.toLowerCase()} band; low transpiration raises fungal risk.`,
+          "advisory.ventLow.headline",
+          undefined,
+          "advisory.ventLow.rationale",
+          { vpd: stepped.vpdLeaf.toFixed(2), stage: stage.id },
           simMinutes
         )
       );
@@ -392,8 +413,10 @@ export function tick(
           zone.id,
           "mist",
           "action",
-          `${stepped.label}: mist 4 min, VPD high despite soil moisture`,
-          `Leaf VPD ${stepped.vpdLeaf.toFixed(2)} kPa exceeds band; stomatal closure risk even though soil water is adequate.`,
+          "advisory.mistHigh.headline",
+          undefined,
+          "advisory.mistHigh.rationale",
+          { vpd: stepped.vpdLeaf.toFixed(2) },
           simMinutes
         )
       );
@@ -404,8 +427,10 @@ export function tick(
           zone.id,
           "scout",
           "urgent",
-          `${stepped.label}: scout for disease, DSV ${stepped.dsv.toFixed(0)} crossed threshold`,
-          `Cumulative Disease Severity Value crossed 15; flagged for scouting, not automatic spraying.`,
+          "advisory.scout.headline",
+          { dsv: stepped.dsv.toFixed(0) },
+          "advisory.scout.rationale",
+          undefined,
           simMinutes
         )
       );
@@ -416,23 +441,19 @@ export function tick(
       const dwell = simMinutes - stepped.faultSince;
       const already = state.faults.some((f) => f.zoneId === zone.id && f.kind === stepped.faultActive);
       if (dwell >= DT_MINUTES && !already) {
-        faultCounter += 1;
         const kind = stepped.faultActive;
-        const messages: Record<FaultKind, { message: string; detail: string }> = {
-          stuck: {
-            message: `${stepped.label}: sensor stuck`,
-            detail: "Rolling variance ≈ 0 while the twin predicts change. Classified as a sensor fault, not an agronomic event.",
-          },
-          drift: {
-            message: `${stepped.label}: sensor drifting`,
-            detail: "Residual (sensor − twin prediction) has exceeded ±3σ and is still growing.",
-          },
-          actuator: {
-            message: `${stepped.label}: irrigation actuator not responding`,
-            detail: "Irrigation was commanded but soil moisture is not rising as the twin predicts. Possible blocked line or valve fault.",
-          },
+        const keys: Record<FaultKind, { messageKey: string; detailKey: string }> = {
+          stuck: { messageKey: "fault.stuck.message", detailKey: "fault.stuck.detail" },
+          drift: { messageKey: "fault.drift.message", detailKey: "fault.drift.detail" },
+          actuator: { messageKey: "fault.actuator.message", detailKey: "fault.actuator.detail" },
         };
-        newFaults.push({ id: `fault-${faultCounter}`, zoneId: zone.id, kind, ...messages[kind], timestamp: simMinutes });
+        newFaults.push({
+          id: `fault-${simMinutes}-${zone.id}-${kind}`,
+          zoneId: zone.id,
+          kind,
+          ...keys[kind],
+          timestamp: simMinutes,
+        });
       }
     }
 
@@ -461,8 +482,10 @@ export function tick(
           null,
           "maintenance",
           "info",
-          "Check internal gutter slope, passive recovery due for inspection",
-          "Algae growth or a blocked gutter silently kills passive condensation recovery. Five-day inspection cadence.",
+          "advisory.gutterCheck.headline",
+          undefined,
+          "advisory.gutterCheck.rationale",
+          undefined,
           simMinutes
         )
       );
@@ -481,7 +504,7 @@ export function tick(
     dayIndex,
     dayFraction,
     gddSum,
-    stage: stage.name,
+    stage: stage.id,
     outdoor,
     zones,
     advisories,
