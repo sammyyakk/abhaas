@@ -1,5 +1,5 @@
 import type { ZoneState, CsiBreakdown } from "./types";
-import { analyzeLeafImage, pickMax, type LeafImageFeatures } from "./leafImageAnalysis";
+import { analyzeLeafImage, weightedPick, type LeafImageFeatures } from "./leafImageAnalysis";
 
 export interface NutrientInfo {
   id: string;
@@ -112,16 +112,14 @@ export async function classifyNutrient(image: string | Blob): Promise<NutrientRe
     new Promise((resolve) => setTimeout(resolve, 1600)),
   ]);
 
-  // TEMP DEMO MODE: deterministic top-match pick (pickMax, not weightedPick)
-  // so scans are reproducible on camera. Revert this commit after recording.
   let deficiency: NutrientInfo;
   let confidence: number;
   if (!features) {
-    deficiency = NUTRIENT_LIST[0];
-    confidence = 90;
+    deficiency = NUTRIENT_LIST[Math.floor(Math.random() * NUTRIENT_LIST.length)];
+    confidence = Math.round(68 + Math.random() * 26);
   } else {
     const weights = NUTRIENT_LIST.map((n) => nutrientWeight(n, features));
-    const picked = pickMax(NUTRIENT_LIST, weights);
+    const picked = weightedPick(NUTRIENT_LIST, weights);
     deficiency = picked.item;
     confidence = Math.round(58 + picked.share * 38);
   }

@@ -1,4 +1,4 @@
-import { analyzeLeafImage, pickMax, type LeafImageFeatures } from "./leafImageAnalysis";
+import { analyzeLeafImage, weightedPick, type LeafImageFeatures } from "./leafImageAnalysis";
 
 export interface PestInfo {
   id: string;
@@ -87,15 +87,13 @@ export async function classifyLeaf(image: string | Blob): Promise<Classification
     new Promise((resolve) => setTimeout(resolve, 1600)),
   ]);
 
-  // TEMP DEMO MODE: deterministic top-match pick (pickMax, not weightedPick)
-  // so scans are reproducible on camera. Revert this commit after recording.
   if (!features) {
-    const pest = PEST_LIST[0];
-    return { pest, confidence: 92 };
+    const pest = PEST_LIST[Math.floor(Math.random() * PEST_LIST.length)];
+    return { pest, confidence: Math.round(72 + Math.random() * 24) };
   }
 
   const weights = PEST_LIST.map((p) => pestWeight(p, features));
-  const { item: pest, share } = pickMax(PEST_LIST, weights);
+  const { item: pest, share } = weightedPick(PEST_LIST, weights);
   const confidence = Math.round(58 + share * 38);
   return { pest, confidence };
 }
