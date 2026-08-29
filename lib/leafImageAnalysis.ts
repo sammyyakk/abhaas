@@ -112,3 +112,15 @@ export function weightedPick<T>(items: T[], weights: number[]): { item: T; share
   const last = items.length - 1;
   return { item: items[last], share: weights[last] / total };
 }
+
+// TEMP DEMO MODE — deterministic top-weight pick, no randomness. Revert this
+// commit once recording is done to restore weightedPick's real probabilistic
+// behavior.
+export function pickMax<T>(items: T[], weights: number[]): { item: T; share: number } {
+  const total = weights.reduce((a, b) => a + b, 0) || 1;
+  let bestIdx = 0;
+  for (let i = 1; i < weights.length; i++) {
+    if (weights[i] > weights[bestIdx]) bestIdx = i;
+  }
+  return { item: items[bestIdx], share: weights[bestIdx] / total };
+}
