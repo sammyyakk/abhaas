@@ -82,20 +82,10 @@ function pestWeight(pest: PestInfo, f: LeafImageFeatures): number {
  * without the UI layer needing to know which backend is behind this call.
  */
 export async function classifyLeaf(image: string | Blob): Promise<ClassificationResult> {
-  const [features] = await Promise.all([
-    analyzeLeafImage(image).catch(() => null),
-    new Promise((resolve) => setTimeout(resolve, 1600)),
-  ]);
-
-  // TEMP DEMO MODE: deterministic top-match pick (pickMax, not weightedPick)
-  // so scans are reproducible on camera. Revert this commit after recording.
-  if (!features) {
-    const pest = PEST_LIST[0];
-    return { pest, confidence: 92 };
-  }
-
-  const weights = PEST_LIST.map((p) => pestWeight(p, features));
-  const { item: pest, share } = pickMax(PEST_LIST, weights);
-  const confidence = Math.round(58 + share * 38);
-  return { pest, confidence };
+  void image;
+  // TEMP DEMO MODE: pinned to Whiteflies for video recording, regardless of
+  // photo content. Revert this commit after recording to restore the real
+  // image-driven pickMax/weightedPick behavior.
+  await new Promise((resolve) => setTimeout(resolve, 1600));
+  return { pest: PEST_LIST[0], confidence: 94 };
 }

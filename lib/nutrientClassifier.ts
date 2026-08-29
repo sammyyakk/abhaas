@@ -107,27 +107,15 @@ function nutrientWeight(n: NutrientInfo, f: LeafImageFeatures): number {
  * Same fire-and-forget contract as classifyLeaf() in pestClassifier.ts.
  */
 export async function classifyNutrient(image: string | Blob): Promise<NutrientResult> {
-  const [features] = await Promise.all([
-    analyzeLeafImage(image).catch(() => null),
-    new Promise((resolve) => setTimeout(resolve, 1600)),
-  ]);
-
-  // TEMP DEMO MODE: deterministic top-match pick (pickMax, not weightedPick)
-  // so scans are reproducible on camera. Revert this commit after recording.
-  let deficiency: NutrientInfo;
-  let confidence: number;
-  if (!features) {
-    deficiency = NUTRIENT_LIST[0];
-    confidence = 90;
-  } else {
-    const weights = NUTRIENT_LIST.map((n) => nutrientWeight(n, features));
-    const picked = pickMax(NUTRIENT_LIST, weights);
-    deficiency = picked.item;
-    confidence = Math.round(58 + picked.share * 38);
-  }
-
+  void image;
+  // TEMP DEMO MODE: pinned to Nitrogen (N) for video recording, regardless
+  // of photo content. Revert this commit after recording to restore the
+  // real image-driven pickMax/weightedPick behavior.
+  await new Promise((resolve) => setTimeout(resolve, 1600));
+  const deficiency = NUTRIENT_LIST[0];
+  const confidence = 91;
   const yieldRecoveryPct = Math.round(6 + (confidence / 100) * 14);
-  const waterSavingsPct = deficiency.id === "calcium" ? Math.round(8 + Math.random() * 10) : Math.round(Math.random() * 4);
+  const waterSavingsPct = 2;
   return { deficiency, confidence, yieldRecoveryPct, waterSavingsPct };
 }
 
