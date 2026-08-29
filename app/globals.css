@@ -91,6 +91,44 @@ h4 {
   font-family: var(--font-mono), ui-monospace, "SF Mono", monospace;
 }
 
+/* Route each non-English locale to a dedicated Noto Sans family with full
+   OpenType shaping tables for that script (see app/layout.tsx) — the OS/
+   browser's own fallback font is often incomplete for Indic conjuncts,
+   rendering correct text as tofu even though nothing is actually wrong
+   with the string. body is the anchor so every element inherits it. */
+html[data-locale="hi"] body,
+html[data-locale="mr"] body {
+  font-family: var(--font-devanagari), var(--font-display), sans-serif;
+}
+html[data-locale="bn"] body,
+html[data-locale="as"] body {
+  font-family: var(--font-bengali), var(--font-display), sans-serif;
+}
+html[data-locale="te"] body {
+  font-family: var(--font-telugu), var(--font-display), sans-serif;
+}
+html[data-locale="ta"] body {
+  font-family: var(--font-tamil), var(--font-display), sans-serif;
+}
+html[data-locale="gu"] body {
+  font-family: var(--font-gujarati), var(--font-display), sans-serif;
+}
+html[data-locale="kn"] body {
+  font-family: var(--font-kannada), var(--font-display), sans-serif;
+}
+html[data-locale="or"] body {
+  font-family: var(--font-oriya), var(--font-display), sans-serif;
+}
+html[data-locale="ml"] body {
+  font-family: var(--font-malayalam), var(--font-display), sans-serif;
+}
+html[data-locale="pa"] body {
+  font-family: var(--font-gurmukhi), var(--font-display), sans-serif;
+}
+html[data-locale="ur"] body {
+  font-family: var(--font-arabic), var(--font-display), sans-serif;
+}
+
 /* None of the 12 non-English locales have upper/lowercase distinctions
    (Brahmic scripts + Urdu/Arabic) — CSS text-transform: uppercase on them
    is meaningless and makes Chromium mis-shape conjunct clusters into
